@@ -38,7 +38,7 @@
  47   public static final int ESAC = 15;              OK  237
  48   public static final int LET = 8;                OK  232
  49   public static final int RBRACE = 39;            OK  258
- 50   public static final int LET_STMT = 9;           NOT FOUND
+ 50   public static final int LET_STMT = 9;           Not Used Here  
  51   public static final int THEN = 12;              OK  235
  52   public static final int BOOL_CONST = 42;        OK  222 e 223
  53   public static final int OBJECTID = 44;          OK  265
