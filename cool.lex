@@ -13,7 +13,7 @@ import java_cup.runtime.Symbol;
  *  lexer actions should go here.  Don't remove or modify anything that
  *  was there initially.  */
 
-    // Integer for counting nested comments
+ // Integer for counting nested comments
     int nestedCommentCount=0;
 
     // Boolean value for determining if string is too long
@@ -30,7 +30,7 @@ import java_cup.runtime.Symbol;
 
     // Boolean for escape character found
     boolean backslashEscaped=false;
-    
+
     // Max size of string constants
     static int MAX_STR_CONST = 1025;
 
@@ -39,17 +39,17 @@ import java_cup.runtime.Symbol;
 
     private int curr_lineno = 1;
     int get_curr_lineno() {
-		return curr_lineno;
+	      return curr_lineno;
     }
 
     private AbstractSymbol filename;
 
     void set_filename(String fname) {
-		filename = AbstractTable.stringtable.addString(fname);
+	    filename = AbstractTable.stringtable.addString(fname);
     }
 
     AbstractSymbol curr_filename() {
-		return filename;
+	    return filename;
     }
 %}
 
@@ -57,8 +57,7 @@ import java_cup.runtime.Symbol;
 
 /*  Stuff enclosed in %init{ %init} is copied verbatim to the lexer
  *  class constructor, all the extra initialization you want to do should
- *  go here.  Dont remove or modify anything that was there initially. */
-
+ *  go here.  Don't remove or modify anything that was there initially. */
 %init}
 
 %eofval{
@@ -67,12 +66,12 @@ import java_cup.runtime.Symbol;
  *  executed when end-of-file is reached.  If you use multiple lexical
  *  states and want to do something special if an EOF is encountered in
  *  one of those states, place your code in the switch statement.
- *  Ultimately, you should return the EOF symbol, or your lexer wont
+ *  Ultimately, you should return the EOF symbol, or your lexer won't
  *  work.  */
 
-    if(eof_encountered) return new Symbol(TokenConstants.EOF);
+   if(eof_encountered) return new Symbol(TokenConstants.EOF);
 
-    switch(yy_lexical_state) {
+  switch(yy_lexical_state) {
     case YYINITIAL:
 	/* nothing special to do in the initial state */
 	break;
@@ -92,19 +91,19 @@ import java_cup.runtime.Symbol;
     case BLOCK_COMMENT:
       eof_encountered=true;
       return new Symbol(TokenConstants.ERROR, "Error: EOF Encountered in Block Comment.");
+
     }
 
     return new Symbol(TokenConstants.EOF);
 %eofval}
 
 %class CoolLexer
-%cup
-/*Additional States*/
+%cup 
+
 %state STRING
 %state BLOCK_COMMENT
 
 %%
-
 
 <YYINITIAL> \"   { 
   string_buf.delete(0, string_buf.length()); //Clears the string_buf, which presumably holds the current string being processed.
@@ -185,14 +184,14 @@ import java_cup.runtime.Symbol;
 
 		backslashEscaped=false;
       } else if(yytext().charAt(0)=='\\') {
-		backslashEscaped=true;
-		string_buf.append(yytext());
+		      backslashEscaped=true;
+		      string_buf.append(yytext());
       } else {
-		string_buf.append(yytext());
+		      string_buf.append(yytext());
       }
 
       if(string_buf.length()>=MAX_STR_CONST) {
-		stringTooLong=true;
+		      stringTooLong=true;
       }
     }
   }
@@ -202,7 +201,6 @@ import java_cup.runtime.Symbol;
 <YYINITIAL> "(*" { yybegin(BLOCK_COMMENT); }
 <YYINITIAL> "*)" { return new Symbol(TokenConstants.ERROR,"Mismatched '*)'"); }
 
-//Hadlin comments
 <BLOCK_COMMENT> "("   { }
 <BLOCK_COMMENT> "*"   { }
 <BLOCK_COMMENT> ")"   { }
@@ -215,10 +213,9 @@ import java_cup.runtime.Symbol;
   }
  }
 <BLOCK_COMMENT> \n    { curr_lineno++; }
-<BLOCK_COMMENT> [^*\n\(\)]+  { /* Do Nothing */ } //Ignoring this escpaes caracteres when they are inside a block comment
+<BLOCK_COMMENT> [^*\n\(\)]+  { /* Do Nothing */ } 
 
 
-//Identifying keywords
 <YYINITIAL> [t][rR][uU][eE]                  { return new Symbol(TokenConstants.BOOL_CONST, new Boolean(true)); }
 <YYINITIAL> [f][aA][lL][sS][eE]              { return new Symbol(TokenConstants.BOOL_CONST, new Boolean(false)); }
 <YYINITIAL> [cC][aA][sS][eE]                 { return new Symbol(TokenConstants.CASE); }
@@ -264,7 +261,7 @@ import java_cup.runtime.Symbol;
 
 <YYINITIAL> [a-z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.OBJECTID, AbstractTable.idtable.addString(yytext())); }
 <YYINITIAL> [A-Z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.TYPEID, AbstractTable.idtable.addString(yytext())); }
-<YYINITIAL> [0-9]*             { return new Symbol(TokenConstants.INT_CONST, AbstractTable.inttable.addString(yytext())); }
+<YYINITIAL> [0-9]+             { return new Symbol(TokenConstants.INT_CONST, AbstractTable.inttable.addString(yytext())); }
 
 <YYINITIAL> [^\n] { return new Symbol(TokenConstants.ERROR, new String(yytext())); }
 
