@@ -77,6 +77,7 @@ A última tratativa antes de iniciar a análise dos estados é a verificação d
 
     }
 ```
+
 ## Código
 
 
