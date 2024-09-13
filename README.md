@@ -9,11 +9,11 @@
 
 ## Descrição do Projeto
 
-###Este projeto é um **Analisador Léxico** desenvolvido como parte do TP1 de Compiladores. O analisador léxico é responsável por ler o código fonte de entrada e transformá-lo em uma sequência de tokens. Este analisador léxico foi desenvolvido para reconhecer tokens a partir de uma entrada de código fonte. Ele identifica padrões de lexemas e associa cada um a um token correspondente. O analisador foi configurado para trabalhar com a linguagem de programação COOL.
+### Este projeto é um **Analisador Léxico** desenvolvido como parte do TP1 de Compiladores. O analisador léxico é responsável por ler o código fonte de entrada e transformá-lo em uma sequência de tokens. Este analisador léxico foi desenvolvido para reconhecer tokens a partir de uma entrada de código fonte. Ele identifica padrões de lexemas e associa cada um a um token correspondente. O analisador foi configurado para trabalhar com a linguagem de programação COOL.
 
 ## Como Funciona
 
-###O analisador léxico lê o código fonte caractere por caractere e, utilizando expressões regulares, agrupa caracteres e os classifica em:
+### O analisador léxico lê o código fonte caractere por caractere e, utilizando expressões regulares, agrupa caracteres e os classifica em:
 
 - **Palavras Reservadas** (e.g., `TRUE`, `IF` ou `FI`, `CASE` ou `ESAC`)
 - **Identificadores** (e.g., nomes de variáveis e funções)
@@ -21,13 +21,13 @@
 - **Delimitadores** (e.g., `;`, `{`, `}`)
 - **Literais** (e.g., números, strings)
 
-###Essas classificações são os **Tokens**, que são armazenados nas tabelas de **STRING**, **ID** e **INT** que trataremos porteriormente.
+### Essas classificações são os **Tokens**, que são armazenados nas tabelas de **STRING**, **ID** e **INT** que trataremos porteriormente.
 
-###O projeto inclui a implementação dos estados de um autômato finito que processa a entrada até encontrar um token ou reportar um erro léxico.
+### O projeto inclui a implementação dos estados de um autômato finito que processa a entrada até encontrar um token ou reportar um erro léxico.
 
 ## Início do Programa
 
-##Para iniciar o analisador léxico precisamos de algumas definições. Dentre elas, podemos destacar:
+## Para iniciar o analisador léxico precisamos de algumas definições. Dentre elas, podemos destacar:
 
 Inicialização da variável responsável por identificar quando uma ocorrência do caracter **\**. Essa variável será muito importante para as verificações e tratativas desse caracter. 
 ```
