@@ -21,7 +21,7 @@
 - **Delimitadores** (e.g., `;`, `{`, `}`)
 - **Literais** (e.g., números, strings)
 
-### Essas classificações são os **Tokens**, que são armazenados nas tabelas de **STRING**, **ID** e **INT** que trataremos porteriormente.
+### Essas classificações são os `Tokens`, que são armazenados nas tabelas de `STRING`, `ID` e `INT` que trataremos porteriormente.
 
 ### O projeto inclui a implementação dos estados de um autômato finito que processa a entrada até encontrar um token ou reportar um erro léxico.
 
@@ -29,7 +29,7 @@
 
 ## Para iniciar o analisador léxico precisamos de algumas definições. Dentre elas, podemos destacar:
 
-Inicialização da variável responsável por identificar quando uma ocorrência do caracter **\**. Essa variável será muito importante para as verificações e tratativas desse caracter. 
+Inicialização da variável responsável por identificar quando uma ocorrência do caracter `\`. Essa variável será muito importante para as verificações e tratativas desse caracter. 
 ```
 boolean backslashEscaped=false;
 ```
@@ -37,7 +37,7 @@ Essa estrutura será responsável por armazenar e construir a cadeia de caracter
 ```
  StringBuffer string_buf = new StringBuffer();
 ```
-Nesse trecho estamos configurando a estrutura para armazenamento e leitura do código-fonte a ser analisado. Transforma o código-fonte em um objeto do tipo **AbstractSymbol**, 
+Nesse trecho estamos configurando a estrutura para armazenamento e leitura do código-fonte a ser analisado. Transforma o código-fonte em um objeto do tipo `AbstractSymbol`, 
 ```
 private AbstractSymbol filename;
 
