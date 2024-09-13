@@ -9,7 +9,7 @@
 
 ## Descrição do Projeto
 
-Este projeto é um `Analisador Léxico` desenvolvido como parte do TP1 de Compiladores. O analisador léxico é responsável por ler o código fonte de entrada e transformá-lo em uma sequência de tokens. Este analisador léxico foi desenvolvido para reconhecer tokens a partir de uma entrada de código fonte. Ele identifica padrões de lexemas e associa cada um a um token correspondente. O analisador foi configurado para trabalhar com a linguagem de programação COOL.
+Este projeto é um `Analisador Léxico` desenvolvido como parte do TP2 de Compiladores. O analisador léxico é responsável por ler o código fonte de entrada e transformá-lo em uma sequência de tokens. Este analisador léxico foi desenvolvido para reconhecer tokens a partir de uma entrada de código fonte. Ele identifica padrões de lexemas e associa cada um a um token correspondente. O analisador foi configurado para trabalhar com a linguagem de programação COOL.
 
 ## Como Funciona
 
@@ -77,7 +77,11 @@ A última tratativa antes de iniciar a análise dos estados é a verificação d
 
     }
 ```
+Importante notar que no trecho `return new Symbol(TokenConstants.ERROR, "Error: EOF Encountered in String.");` instanciamos um objeto do tipo `Symbol`. Esse objeto é o responsável por salvar nas tabelas o Token identificado. `TokenConstants` nada mais é que um `define` para um ID inteiro, que é o que realmente será salvo na tabela e cada Token possui seu ID próprio
 
 ## Código
-
+O analisador lexico desenvolvido é baseado em uma máquina de 3 estados, sendo eles `<YYINITIAL>`, `<STRING>` e `<BLOCK_COMMENT>`. A estrutura dos estados é descrita da seguinte forma.
+```
+<ESTADO> stringLida { realizar determinada ação e/ou retornar um novo objeto do tipo `Symbol` }
+```
 
