@@ -15,13 +15,16 @@ Este projeto é um `Analisador Léxico` desenvolvido como parte do TP2 de Compil
 
 O analisador léxico lê o código fonte caractere por caractere e, utilizando expressões regulares, agrupa caracteres e os classifica em:
 
-- **Palavras Reservadas** (e.g., `TRUE`, `IF` ou `FI`, `CASE` ou `ESAC`)
-- **Identificadores** (e.g., nomes de variáveis e funções)
+- **Identificadores** (e.g., nomes de variáveis, funções e tipos)
 - **Operadores** (e.g., `+`, `*`, `=>`, `@`)
 - **Delimitadores** (e.g., `;`, `{`, `}`)
 - **Literais** (e.g., números, strings)
 
-Essas classificações são os `Tokens`, que são armazenados nas tabelas de `STRING`, `ID` e `INT` que trataremos porteriormente.
+`Inteiros` são strings não-vazias de dígitos no intervalo de 0 até 9. `Ientificadores` são strings que consistem em letras, dígitos e o caracter undescore (_).
+
+Para identificadores de tipos usamos a primeira letra como maiúscula. Para identificadores de objetos utilizamos a primeira letra minúscula. Utilizamos também dois identificadores especiais, que são o `self` e o `SELF_TYPE` que são tratadas de modo diferente pelo COOL.
+
+Essas classificações são os `Tokens`, que são armazenados nas tabelas de `STRING`, `ID` e `INT` que trataremos porteriormente. 
 
 O projeto inclui a implementação dos estados de um autômato finito que processa a entrada até encontrar um token ou reportar um erro léxico.
 
@@ -77,11 +80,11 @@ A última tratativa antes de iniciar a análise dos estados é a verificação d
 
     }
 ```
-Importante notar que no trecho `return new Symbol(TokenConstants.ERROR, "Error: EOF Encountered in String.");` instanciamos um objeto do tipo `Symbol`. Esse objeto é o responsável por salvar nas tabelas o Token identificado. `TokenConstants` nada mais é que um `define` para um ID inteiro, que é o que realmente será salvo na tabela e cada Token possui seu ID próprio
+Importante notar que no trecho `return new Symbol(TokenConstants.ERROR, "Error: EOF Encountered in String.");` instanciamos um objeto do tipo `Symbol`. Esse objeto é o responsável por salvar nas tabelas o Token identificado. `TokenConstants` nada mais é que um `define` para um ID inteiro, que é o que realmente será salvo na tabela e cada Token possui seu ID próprio.
 
 ## Código
 O analisador lexico desenvolvido é baseado em uma máquina de 3 estados, sendo eles `<YYINITIAL>`, `<STRING>` e `<BLOCK_COMMENT>`. A estrutura dos estados é descrita da seguinte forma.
 ```
 <ESTADO> stringLida { realizar determinada ação e/ou retornar um novo objeto do tipo `Symbol` }
 ```
-
+Foi preciso implementar no analisador algumas funções que lidassem com situações específicas, como por exemplo a expressão `<STRING> \"` que trata sobre o encerramento de uma aspa dupla ou a presença de uma barra invertida dentro de uma string e a `<STRING> \n` que executa a quebra de linha.
