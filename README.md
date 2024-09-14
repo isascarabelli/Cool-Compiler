@@ -6,6 +6,7 @@
 2. [Como Funciona](#como-funciona)
 3. [Início do Programa](#início-do-programa)
 4. [Código](#código)
+5. [Testes](#testes)
 
 ## Descrição do Projeto
 
@@ -87,4 +88,47 @@ O analisador lexico desenvolvido é baseado em uma máquina de 3 estados, sendo 
 ```
 <ESTADO> stringLida { realizar determinada ação e/ou retornar um novo objeto do tipo `Symbol` }
 ```
-Foi preciso implementar no analisador algumas funções que lidassem com situações específicas, como por exemplo a expressão `<STRING> \"` que trata sobre o encerramento de uma aspa dupla ou a presença de uma barra invertida dentro de uma string e a `<STRING> \n` que executa a quebra de linha.
+Foi preciso implementar no analisador algumas funções que lidassem com situações específicas, como por exemplo a expressão abaixo que executa a quebra de linha. Ele trata exibindo um erro no caso de não haver um caracter `\` ou uma string vazia e, caso contrário, efetiva aquele caracter como uma quebra de linha.
+```
+<STRING> \n { // Code for newline characters
+  // If a newline appears in a string, it must be escaped, else error
+  if(!backslashEscaped || string_buf.length()==0) {
+    curr_lineno++;
+    yybegin(YYINITIAL);
+    return new Symbol(TokenConstants.ERROR, "Unterminated string constant");
+  } else {
+    // Replace '\' character in string buffer with newline
+    string_buf.setCharAt(string_buf.length()-1, '\n');
+    curr_lineno++;
+  }
+ }
+```
+Outro exemplo de adaptação que devemos adotar para o analisador lexico é quanto à abertura e fechamento de determinadas Tokens. Abaixo está o bloco de reconhecimento de abertura e fechamento de comentários. De semelhante modo ao bloco acima, aqui precisamos da obrigatoriedade de fechamento do bloco em caso de abertura, e não há outras possibilidades para essa string, que é diferente das que iniciam com o caracter `\`.
+```
+<BLOCK_COMMENT> "(*"  { nestedCommentCount++; }
+<BLOCK_COMMENT> "*)" {
+  if(nestedCommentCount!=0) {
+    nestedCommentCount--;
+  } else {
+    yybegin(YYINITIAL);
+  }
+ }
+```
+Partindo agora para as expressões regulares que fazem a análise de todas os Tokens, descritas da seguinte forma:
+```
+<YYINITIAL> [cC][lL][aA][sS][sS]             { return new Symbol(TokenConstants.CLASS); }
+```
+Nesse caso, estamos lendo a palavra reservada `CLASS`. Partindo do estado `YYINITIAL`, cada caractere é lido intependentemente se é maiúsculo ou minúsculo, o que faz com que a linguagem não seja case sensitive. Ao se formar a palavra `CLASS`, é identificado qual Token está sendo declarada e posteriormente retornando um novo objeto `Symbol`.
+
+No bloco abaixo é caso é semelhante, sendo o caractere `,` lido e semelhantemente retornando um novo objeto `Symbol`.
+```
+<YYINITIAL> ","   { return new Symbol(TokenConstants.COMMA);  }
+```
+Finalmente implementamos os estados que dividem os Tokens em 3 tipos: `STRING`, `ID` e `INT`. Para os tipos `STRING` e `ID` uma tabela é implementada alterando apenas o tipo do Token, e para o tipo `INT` outra tabela é implementada.
+```
+<YYINITIAL> [a-z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.OBJECTID, AbstractTable.idtable.addString(yytext())); }
+<YYINITIAL> [A-Z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.TYPEID, AbstractTable.idtable.addString(yytext())); }
+<YYINITIAL> [0-9]+             { return new Symbol(TokenConstants.INT_CONST, AbstractTable.inttable.addString(yytext())); }
+```
+
+## Testes
