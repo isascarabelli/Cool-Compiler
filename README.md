@@ -132,3 +132,38 @@ Finalmente implementamos os estados que dividem os Tokens em 3 tipos: `STRING`, 
 ```
 
 ## Testes
+Foram realizados `XXXXXXXXXXXXXXX` testes para esse projeto sendo eles, além do arquivo `test.cl` já implementado, a máquina de pilha especificada no trabalho 2 e descrito em nosso trabalho como `XXXXXXXXXXXXXXX`.
+A função do código já implementado é definida como um teste que modela autômato celular unidimensional em um círculo de raio finito. Arrays são simulados como Strings, X's representam células vivas, pontos representam células mortas, e nenhuma verificação de erro é feita. Já a máquina de pilha funciona num loop. Enquanto lê números, o caracter `s` e a string `+`, o código os adiciona na pilha. Ao ler a letra `D`, ele imprime a pilha. Ao ler a letra `E`, ele pega o topo da pilha e salva em `CH`. A partir daí ele checa qual o valor que estava no início da pilha e executa os procedimentos de acordo com o que foi especificado.
+
+Abaixo está um trecho da saída final produzida pelo analizador léxico no arquivo original `test.cl`.
+```
+#7 IN
+#7 WHILE
+#7 OBJECTID countdown
+#7 ERROR ">"
+#7 INT_CONST 0
+#7 LOOP
+#7 '{'
+#7 OBJECTID cells
+#7 '.'
+#7 OBJECTID evolve
+#7 '('
+#7 ')'
+#7 ';'
+#7 OBJECTID cells
+#7 '.'
+#7 OBJECTID print
+#7 '('
+#7 ')'
+#7 ';'
+#7 OBJECTID countdown
+#7 ASSIGN
+#7 OBJECTID countdown
+#7 '-'
+#7 INT_CONST 1
+#7 ';'
+#7 POOL
+#7 ')'
+#7 ';'
+#12 ERROR "Error: EOF Encountered in Block Comment."
+```
