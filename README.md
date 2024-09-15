@@ -33,7 +33,7 @@ O projeto inclui a implementação dos estados de um autômato finito que proces
 
 Para iniciar o analisador léxico precisamos de algumas definições. Dentre elas, podemos destacar:
 
-Inicialização da variável responsável por identificar quando uma ocorrência do caracter `\`. Essa variável será muito importante para as verificações e tratativas desse caracter. 
+Inicialização da variável responsável por identificar quando há uma ocorrência do caracter `\`. Essa variável será muito importante para as verificações e tratativas desse caracter. 
 ```
 boolean backslashEscaped=false;
 ```
@@ -55,7 +55,7 @@ private AbstractSymbol filename;
 ```
 Também realiza inicializações de variáveis booleanas de verificações como se há algum caracter nulo na String ou se a String é muito extensa.
 
-A última tratativa antes de iniciar a análise dos estados é a verificação de fim de arquivo e as respectivas tratativas de acordo com o estado atual no qual o fim do arquivo foi encontrado.
+A última tratativa antes de iniciar a análise dos estados é a verificação de fim de arquivo e as respectivas tratativas de acordo com o estado atual no qual o fim do arquivo foi encontrado (trata o que deve ser feito em cada estado (YYINITTIAL, STRING e BLOCK_COMMENT) qusndo encontrado um fim de arquivo.
 
 ```
  switch(yy_lexical_state) {
@@ -88,7 +88,7 @@ O analisador lexico desenvolvido é baseado em uma máquina de 3 estados, sendo 
 ```
 <ESTADO> stringLida { realizar determinada ação e/ou retornar um novo objeto do tipo `Symbol` }
 ```
-Foi preciso implementar no analisador algumas funções que lidassem com situações específicas, como por exemplo a expressão abaixo que executa a quebra de linha. Ele trata exibindo um erro no caso de não haver um caracter `\` ou uma string vazia e, caso contrário, efetiva aquele caracter como uma quebra de linha.
+Foi preciso implementar no analisador algumas funções que lidassem com situações específicas, como por exemplo a expressão abaixo que executa a quebra de linha. Ele trata exibindo um erro no caso de não haver um caracter `\` a mais ou uma string vazia e, caso contrário, efetiva aquele caracter como uma quebra de linha.
 ```
 <STRING> \n { // Code for newline characters
   // If a newline appears in a string, it must be escaped, else error
@@ -104,6 +104,7 @@ Foi preciso implementar no analisador algumas funções que lidassem com situaç
  }
 ```
 Outro exemplo de adaptação que devemos adotar para o analisador lexico é quanto à abertura e fechamento de determinadas Tokens. Abaixo está o bloco de reconhecimento de abertura e fechamento de comentários. De semelhante modo ao bloco acima, aqui precisamos da obrigatoriedade de fechamento do bloco em caso de abertura, e não há outras possibilidades para essa string, que é diferente das que iniciam com o caracter `\`.
+Ao encontrar uma abertura de bloco de comentário "(*", a variável nestesCommentCount é incrementada indicando que houve mais uma abertura. Se encontrado um fechamento, essa variável é decrementada. Quando todos os blocos são fechados, a máquina retorna para o estado inicial.
 ```
 <BLOCK_COMMENT> "(*"  { nestedCommentCount++; }
 <BLOCK_COMMENT> "*)" {
@@ -118,22 +119,38 @@ Partindo agora para as expressões regulares que fazem a análise de todas os To
 ```
 <YYINITIAL> [cC][lL][aA][sS][sS]             { return new Symbol(TokenConstants.CLASS); }
 ```
-Nesse caso, estamos lendo a palavra reservada `CLASS`. Partindo do estado `YYINITIAL`, cada caractere é lido intependentemente se é maiúsculo ou minúsculo, o que faz com que a linguagem não seja case sensitive. Ao se formar a palavra `CLASS`, é identificado qual Token está sendo declarada e posteriormente retornando um novo objeto `Symbol`.
+Nesse caso, estamos lendo a palavra reservada `CLASS`. Partindo do estado `YYINITIAL`, cada caractere é lido independentemente se é maiúsculo ou minúsculo, já que a linguagem não é case sensitive (exceto as declarações true e false que precisam obrigatoriamente começar com letras minúsculas). Ao se formar a palavra `CLASS`, é identificado qual Token está sendo declarada e posteriormente retornando um novo objeto `Symbol`.
 
-No bloco abaixo é caso é semelhante, sendo o caractere `,` lido e semelhantemente retornando um novo objeto `Symbol`.
+No bloco abaixo o caso é semelhante, sendo o caractere `,` lido e semelhantemente retornando um novo objeto `Symbol`.
 ```
 <YYINITIAL> ","   { return new Symbol(TokenConstants.COMMA);  }
 ```
-Finalmente implementamos os estados que dividem os Tokens em 3 tipos: `STRING`, `ID` e `INT`. Para os tipos `STRING` e `ID` uma tabela é implementada alterando apenas o tipo do Token, e para o tipo `INT` outra tabela é implementada.
+Finalmente implementamos as expressões regulares que dividem os Tokens em 3 tipos: `OBJECTID`, `TYPEID` e `INT`. Seguindo as especificações no manual de referência cool, os identificadores são identificados e adicionados na sua tabla específica (de id e de int).
 ```
 <YYINITIAL> [a-z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.OBJECTID, AbstractTable.idtable.addString(yytext())); }
 <YYINITIAL> [A-Z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.TYPEID, AbstractTable.idtable.addString(yytext())); }
 <YYINITIAL> [0-9]+             { return new Symbol(TokenConstants.INT_CONST, AbstractTable.inttable.addString(yytext())); }
 ```
+Realizamos essas identificações para cada palavra reservada e operadores descritos em TokenConstants.java.
+
+Para eliminarmos os espaços em branco, utilizamos a seguinte expressão regular:
+```
+<YYINITIAL> [ \t\v\n\r\f\013]+    { /* Get rid of whitespace */ }
+```
+onde,
+  : representa o espaço em branco literal.
+\t: representa o caractere de tabulação (tab).
+\v: representa o caracter de tabulação vertical
+\n: representa o caractere de nova linha (line feed).
+\r: representa o caractere carriage return.
+\f: representa o caractere form feed.
+\013: O caractere ASCII que corresponde ao valor decimal 13 (que também pode ser um caractere de controle).
+
+Qualquer regra que não atenda nenhuma das regras especificadas é reconhecida como erro lexo.
 
 ## Testes
-Foram realizados 3 testes para esse projeto sendo eles, além do arquivo `test.cl` já implementado, a máquina de pilha especificada no trabalho 2 e descrito em nosso trabalho como `XXXXXXXXXXXXXXX`.
-A função do código já implementado é definida como um teste que modela autômato celular unidimensional em um círculo de raio finito. Arrays são simulados como Strings, X's representam células vivas, pontos representam células mortas, e nenhuma verificação de erro é feita. Já a máquina de pilha funciona num loop. Enquanto lê números, o caracter `s` e a string `+`, o código os adiciona na pilha. Ao ler a letra `D`, ele imprime a pilha. Ao ler a letra `E`, ele pega o topo da pilha e salva em `CH`. A partir daí ele checa qual o valor que estava no início da pilha e executa os procedimentos de acordo com o que foi especificado.
+Foram realizados 3 testes para esse projeto sendo eles, além do arquivo `test.cl` já implementado, a máquina de pilha especificada no trabalho 2 de uma integrante do grupo, e o descrito em nosso trabalho como `XXXXXXXXXXXXXXX`.
+A função do código já implementado é definida como um teste que modela autômato celular unidimensional em um círculo de raio finito. Arrays são simulados como Strings, X's representam células vivas, pontos representam células mortas, e nenhuma verificação de erro é feita. Já a máquina de pilha funciona num loop. Enquanto lê números, o caracter `s` e a string `+`, o código os adiciona na pilha. Ao ler a letra `d`, ele imprime a pilha. Ao ler a letra `e`, ele pega o topo da pilha e salva em `ch`. A partir daí ele checa qual o valor que estava no início da pilha e executa os procedimentos de acordo com o que foi especificado.
 
 Abaixo está um trecho da saída final produzida pelo analizador léxico no arquivo original `test.cl`.
 ```
