@@ -132,7 +132,7 @@ Finalmente implementamos os estados que dividem os Tokens em 3 tipos: `STRING`, 
 ```
 
 ## Testes
-Foram realizados `XXXXXXXXXXXXXXX` testes para esse projeto sendo eles, além do arquivo `test.cl` já implementado, a máquina de pilha especificada no trabalho 2 e descrito em nosso trabalho como `XXXXXXXXXXXXXXX`.
+Foram realizados 3 testes para esse projeto sendo eles, além do arquivo `test.cl` já implementado, a máquina de pilha especificada no trabalho 2 e descrito em nosso trabalho como `XXXXXXXXXXXXXXX`.
 A função do código já implementado é definida como um teste que modela autômato celular unidimensional em um círculo de raio finito. Arrays são simulados como Strings, X's representam células vivas, pontos representam células mortas, e nenhuma verificação de erro é feita. Já a máquina de pilha funciona num loop. Enquanto lê números, o caracter `s` e a string `+`, o código os adiciona na pilha. Ao ler a letra `D`, ele imprime a pilha. Ao ler a letra `E`, ele pega o topo da pilha e salva em `CH`. A partir daí ele checa qual o valor que estava no início da pilha e executa os procedimentos de acordo com o que foi especificado.
 
 Abaixo está um trecho da saída final produzida pelo analizador léxico no arquivo original `test.cl`.
