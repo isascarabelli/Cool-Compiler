@@ -1,28 +1,14 @@
-class TesteNegacao inherits IO {
-  
-  testNegacaoLogica() : Bool {
-    let valor: Bool <- not true in valor;
-  };
-
-  testNegacaoAritmetica() : Int {
-    let valor: Int <- 5 in ~valor; 
-  };
-
-};
-
 class Main inherits IO {
   
   main() : Object {
     {
-      let teste: TesteNegacao <- new TesteNegacao in {
-        out_string("Testando negação lógica (not true): ");
-        out_bool(teste.testNegacaoLogica());
-        out_string("\n");
+      out_string("Testando negação lógica: ");
+      out_bool(not true); 
+      out_string("\n");
 
-        out_string("Testando negação aritmética (~5): ");
-        out_int(teste.testNegacaoAritmetica());
-        out_string("\n");
-      };
+      out_string("Testando negação aritmética: ");
+      out_int(~5); 
+      out_string("\n");
     }
   };
 
