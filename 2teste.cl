@@ -5,7 +5,7 @@ class TesteNegacao inherits IO {
   };
 
   testNegacaoAritmetica() : Int {
-    let valor: Int <- 5 in ~valor;  -- negação aritmética de 5, resultado deve ser -6
+    let valor: Int <- 5 in ~valor; 
   };
 
 };
