@@ -33,7 +33,7 @@ class Teste inherits IO {
   };
 
   testePontoMetodo() : String {
-    out_string("Chamando método usando ponto.");
+    out_string("Chamando metodo usando ponto.");
     out_string("Outra chamada de método.");
   };
 
@@ -44,7 +44,7 @@ class Teste inherits IO {
 
   dispatchMetodo() : Int {
     let obj: IO <- new IO;
-    obj@IO.out_string("Chamando método com @ para dispatch.");
+    obj@IO.out_string("Chamando metodo com @ para dispatch.");
     0;
   };
 };
@@ -82,7 +82,7 @@ class Main inherits IO {
         out_int(testeObj.testeMetodo(5));
         out_string("\n");
 
-        out_string("\nTeste 2: testando negação e NOT\n");
+        out_string("\nTeste 2: testando negacao e NOT\n");
         out_string("Resultado do negacaoMetodo: ");
         out_bool(testeObj.negacaoMetodo());
         out_string("\n");
@@ -92,16 +92,16 @@ class Main inherits IO {
         out_string(testeObj.stringMetodo());
         out_string("\n");
 
-        out_string("\nTeste 4: testando operadores de comparação\n");
+        out_string("\nTeste 4: testando operadores de comparacao\n");
         out_string("Resultado do ComparacaoMetodo: ");
         out_bool(testeObj.ComparacaoMetodo());
         out_string("\n");
 
-        out_string("\nTeste 5: testando chamada de método com ponto\n");
+        out_string("\nTeste 5: testando chamada de metodo com ponto\n");
         testeObj.testePontoMetodo();
         out_string("\n");
 
-        out_string("\nTeste 6: testando criação de novos objetos\n");
+        out_string("\nTeste 6: testando criacao de novos objetos\n");
         out_string("Criando novo objeto com novoMetodo\n");
         let novoObj: Teste <- testeObj.novoMetodo();
         out_string("Novo objeto criado com sucesso.\n");
@@ -113,7 +113,7 @@ class Main inherits IO {
 
       let testeCompletoObj: TesteCompleto <- new TesteCompleto in {
         out_string("\nIniciando Testes da Classe TesteCompleto\n");
-        out_string("Teste 8: testando vários operadores e palavras-chave\n");
+        out_string("Teste 8: testando varios operadores e palavras-chave\n");
         out_string("Resultado do myFullTest: ");
         out_int(testeCompletoObj.myFullTest(5));
         out_string("\n");
