@@ -34,7 +34,7 @@ class Teste inherits IO {
 
   testePontoMetodo() : String {
     out_string("Chamando metodo usando ponto.");
-    out_string("Outra chamada de método.");
+    out_string("Outra chamada de metodo.");
   };
 
   novoMetodo() : Teste {
@@ -44,7 +44,7 @@ class Teste inherits IO {
 
   dispatchMetodo() : Int {
     let obj: IO <- new IO;
-    obj@IO.out_string("Chamando metodo com @ para dispatch.");
+    obj@IO.out_string("Chamando metodo para dispatch.");
     0;
   };
 };
