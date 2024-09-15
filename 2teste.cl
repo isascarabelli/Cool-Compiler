@@ -16,7 +16,7 @@ class Main inherits IO {
         out_string("Resultado do negacaoMetodo: ");
         out_bool(testeObj.negacaoMetodo());
         out_string("\n");
- };
-    }
+      };
+    };
   };
 };
