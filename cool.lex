@@ -162,24 +162,21 @@ import java_cup.runtime.Symbol;
     } else {
       int length=string_buf.length();
       if(string_buf.charAt(string_buf.length()-1)=='\\' && backslashEscaped) {
-		switch(yytext().charAt(0)) {
-		case 'b':
-		string_buf.setCharAt(length-1, '\b');
-		break;
-		case 't':
-		string_buf.setCharAt(length-1, '\t');
-		break;
-		case 'n':
-		string_buf.setCharAt(length-1, '\n');
-		break;
-		case 'f':
-		string_buf.setCharAt(length-1, '\f');
-		break;
-		case '\\':
-		//string_buf.append('\\');
-		break;
-		default:
-		string_buf.setCharAt(length-1, yytext().charAt(0));
+        switch(yytext().charAt(0)) {
+        case 'b':
+        string_buf.setCharAt(length-1, '\b');
+        break;
+        case 't':
+        string_buf.setCharAt(length-1, '\t');
+        break;
+        case 'n':
+        string_buf.setCharAt(length-1, '\n');
+        break;
+        case 'f':
+        string_buf.setCharAt(length-1, '\f');
+        break;
+        default:
+        string_buf.setCharAt(length-1, yytext().charAt(0));
 		}
 
 		backslashEscaped=false;
@@ -216,31 +213,36 @@ import java_cup.runtime.Symbol;
 <BLOCK_COMMENT> [^*\n\(\)]+  { /* Do Nothing */ } 
 
 
+<YYINITIAL> [iI][nN][hH][eE][rR][iI][tT][sS] { return new Symbol(TokenConstants.INHERITS); }
+<YYINITIAL> [pP][oO][oO][lL]                 { return new Symbol(TokenConstants.POOL); }
+<YYINITIAL> [cC][aA][sS][eE]                 { return new Symbol(TokenConstants.CASE); }
 <YYINITIAL> [t][rR][uU][eE]                  { return new Symbol(TokenConstants.BOOL_CONST, new Boolean(true)); }
 <YYINITIAL> [f][aA][lL][sS][eE]              { return new Symbol(TokenConstants.BOOL_CONST, new Boolean(false)); }
-<YYINITIAL> [cC][aA][sS][eE]                 { return new Symbol(TokenConstants.CASE); }
 <YYINITIAL> [cC][lL][aA][sS][sS]             { return new Symbol(TokenConstants.CLASS); }
 <YYINITIAL> [eE][lL][sS][eE]                 { return new Symbol(TokenConstants.ELSE); }
 <YYINITIAL> [fF][iI]                         { return new Symbol(TokenConstants.FI); }
 <YYINITIAL> [iI][fF]                         { return new Symbol(TokenConstants.IF); }
 <YYINITIAL> [iI][nN]                         { return new Symbol(TokenConstants.IN); }
-<YYINITIAL> [iI][nN][hH][eE][rR][iI][tT][sS] { return new Symbol(TokenConstants.INHERITS); }
-<YYINITIAL> [iI][sS][vV][oO][iI][dD]         { return new Symbol(TokenConstants.ISVOID); }
-<YYINITIAL> [lL][eE][tT]                     { return new Symbol(TokenConstants.LET); }
-<YYINITIAL> [lL][oO][oO][pP]                 { return new Symbol(TokenConstants.LOOP); }
-<YYINITIAL> [pP][oO][oO][lL]                 { return new Symbol(TokenConstants.POOL); }
-<YYINITIAL> [tT][hH][eE][nN]                 { return new Symbol(TokenConstants.THEN); }
-<YYINITIAL> [wW][hH][iI][lL][eE]             { return new Symbol(TokenConstants.WHILE); }
 <YYINITIAL> [eE][sS][aA][cC]                 { return new Symbol(TokenConstants.ESAC); }
 <YYINITIAL> [nN][eE][wW]                     { return new Symbol(TokenConstants.NEW); }
 <YYINITIAL> [oO][fF]                         { return new Symbol(TokenConstants.OF); }
 <YYINITIAL> [nN][oO][tT]                     { return new Symbol(TokenConstants.NOT); }
+<YYINITIAL> [iI][sS][vV][oO][iI][dD]         { return new Symbol(TokenConstants.ISVOID); }
+<YYINITIAL> [lL][eE][tT]                     { return new Symbol(TokenConstants.LET); }
+<YYINITIAL> [lL][oO][oO][pP]                 { return new Symbol(TokenConstants.LOOP); }
+<YYINITIAL> [tT][hH][eE][nN]                 { return new Symbol(TokenConstants.THEN); }
+<YYINITIAL> [wW][hH][iI][lL][eE]             { return new Symbol(TokenConstants.WHILE); }
 
-<YYINITIAL>"=>"	  { return new Symbol(TokenConstants.DARROW); }
+
 <YYINITIAL> "*"   { return new Symbol(TokenConstants.MULT);   }
 <YYINITIAL> "("   { return new Symbol(TokenConstants.LPAREN); }
+<YYINITIAL>"=>"	  { return new Symbol(TokenConstants.DARROW); }
 <YYINITIAL> ";"   { return new Symbol(TokenConstants.SEMI);   }
 <YYINITIAL> "-"   { return new Symbol(TokenConstants.MINUS);  }
+<YYINITIAL> "{"   { return new Symbol(TokenConstants.LBRACE); }
+<YYINITIAL> "}"   { return new Symbol(TokenConstants.RBRACE); }
+<YYINITIAL> "@"   { return new Symbol(TokenConstants.AT);     }
+<YYINITIAL> "~"   { return new Symbol(TokenConstants.NEG);    }
 <YYINITIAL> ")"   { return new Symbol(TokenConstants.RPAREN); }
 <YYINITIAL> "<"   { return new Symbol(TokenConstants.LT);     }
 <YYINITIAL> ","   { return new Symbol(TokenConstants.COMMA);  }
@@ -251,19 +253,15 @@ import java_cup.runtime.Symbol;
 <YYINITIAL> "<="  { return new Symbol(TokenConstants.LE);     }
 <YYINITIAL> "="   { return new Symbol(TokenConstants.EQ);     }
 <YYINITIAL> ":"   { return new Symbol(TokenConstants.COLON);  }
-<YYINITIAL> "{"   { return new Symbol(TokenConstants.LBRACE); }
-<YYINITIAL> "}"   { return new Symbol(TokenConstants.RBRACE); }
-<YYINITIAL> "@"   { return new Symbol(TokenConstants.AT);     }
-<YYINITIAL> "~"   { return new Symbol(TokenConstants.NEG);    }
-<YYINITIAL> "--".* { /* End of Line comment: Do nothing */ }
+<YYINITIAL> "--".* { /* Comment on line: Do nothing */ }
 
-<YYINITIAL> [ \t\n\r\f\013]+    { /* Get rid of whitespace */ }
+<YYINITIAL> [ \t\v\n\r\f\013]+    { /* Get rid of whitespace */ }
 
 <YYINITIAL> [a-z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.OBJECTID, AbstractTable.idtable.addString(yytext())); }
 <YYINITIAL> [A-Z][_a-zA-Z0-9]* { return new Symbol(TokenConstants.TYPEID, AbstractTable.idtable.addString(yytext())); }
 <YYINITIAL> [0-9]+             { return new Symbol(TokenConstants.INT_CONST, AbstractTable.inttable.addString(yytext())); }
 
-<YYINITIAL> [^\n] { return new Symbol(TokenConstants.ERROR, new String(yytext())); }
+<YYINITIAL> [^\n] { return new Symbol(TokenConstants.ERROR, new String(yytext())); /*Recongnize lexical errors early on */ }
 
 .                               { /* This rule should be the very last
                                      in your lexical specification and
