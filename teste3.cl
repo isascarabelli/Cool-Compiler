@@ -24,7 +24,7 @@ class Teste inherits IO {
     s;
   };
 
-  ComparacaoMetodo() : Bool {
+  comparacaoMetodo() : Bool {
     let a: Int <- 20;
     let b: Int <- 25;
     a < b;
