@@ -167,3 +167,35 @@ Abaixo está um trecho da saída final produzida pelo analizador léxico no arqu
 #7 ';'
 #12 ERROR "Error: EOF Encountered in Block Comment."
 ```
+E aqui um trecho da saída produzida pelo analisador léxico à maquina de pilha.
+```
+#9 IF
+#9 OBJECTID i
+#9 '='
+#9 INT_CONST 9
+#9 THEN
+#9 STR_CONST "9"
+#9 ELSE
+#9 '{'
+#9 OBJECTID abort
+#9 '('
+#9 ')'
+#9 ';'
+#9 STR_CONST ""
+#9 ';'
+#9 '}'
+#9 FI
+#9 FI
+#9 FI
+#9 FI
+#9 FI
+#9 FI
+#9 FI
+#9 FI
+#9 FI
+#9 FI
+#9 '}'
+#9 ';'
+#10 '}'
+#10 ';'
+```
