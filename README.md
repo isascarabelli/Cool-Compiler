@@ -149,13 +149,24 @@ onde,
 Qualquer regra que não atenda nenhuma das regras especificadas é reconhecida como erro lexo.
 
 ## Testes
-Foram realizados 3 testes para esse projeto sendo eles, além do arquivo `test.cl` já implementado, a máquina de pilha especificada no trabalho 2 de uma integrante do grupo, e o descrito em nosso trabalho como `teste3.cl`.
+Foram realizados 3 testes para esse projeto sendo eles, além do arquivo `test.cl` já implementado, a máquina de pilha `stack.ck` desenvolvida no trabalho 2 de uma integrante do grupo, e o descrito em nosso trabalho como `testeFinal.cl`.
 
 A função do código já implementado é definida como um teste que modela autômato celular unidimensional em um círculo de raio finito. Arrays são simulados como Strings, X's representam células vivas, pontos representam células mortas, e nenhuma verificação de erro é feita. 
 
 Já a máquina de pilha funciona num loop. Enquanto lê números, o caracter `s` e a string `+`, o código os adiciona na pilha. Ao ler a letra `d`, ele imprime a pilha. Ao ler a letra `e`, ele pega o topo da pilha e salva em `ch`. A partir daí ele checa qual o valor que estava no início da pilha e executa os procedimentos de acordo com o que foi especificado. 
 
-Por fim, o 'teste3.cl' descreve uma série de testes para validar a análise léxica da linguagem, por meio de diferentes construções da linguagem, como palavras-chave, operadores, e tipos de dados. O código é composto por várias classes e métodos que servem para verificar o comportamento da linguagem em situações distintas. Foi utilizada a orientação a objetos e herança de classe, para promover a reutilização de código. Um exemplo de herança pode ser visto nas classes 'Teste' e 'TesteCompleto' em que herdam a classe 'IO'.
+Por fim, o 'testeFinal.cl' descreve uma série de testes para validar a análise léxica da linguagem, por meio de diferentes construções da linguagem, como palavras-chave, operadores, e tipos de dados. O código é composto por várias classes e métodos que servem para verificar o comportamento da linguagem em situações distintas. Foi utilizada a orientação a objetos e herança de classe, para promover a reutilização de código. Um exemplo de herança pode ser visto nas classes 'Teste' e 'TesteCompleto' em que herdam a classe 'IO'.
+
+Sobre os testes feitos no testeFinal.cl:
+ 
+- Teste 1: `testeMetodo` : Testa operadores aritméticos, palavras-chave, e comparações como `let`, `if`, `else`, `then`, `fi`, `+`, `*`, `<=`, entre outros.
+- Teste 2: `negacaoMetodo`: Realiza testes de negação lógica usando `not` e `~`.
+- Teste 3: `stringMetodo` : Faz testes com strings e exibe valores string usando `out_string`.
+- Teste 4: `comparacaoMetodo` : Testa operadores de comparação, como `<` e `=`.
+- Teste 5: `testePontoMetodo` :Testa a chamada de métodos com ponto `(.)`.
+- Teste 6: `novoMetodo` : Testa a criação de novos objetos com a palavra-chave `new`.
+- Teste 7: `dispatchMetodo` : Testa a chamada de métodos com `@ (dispatch)`.
+- Teste 8: `myFullTest`: Realiza um teste mais abrangente, verificando operadores aritméticos, controle de fluxo, e operadores lógicos.
 
 Abaixo está um trecho da saída final produzida pelo analizador léxico no arquivo original `test.cl`.
 ```
@@ -189,7 +200,7 @@ Abaixo está um trecho da saída final produzida pelo analizador léxico no arqu
 #7 ';'
 #11 ERROR "Error: EOF Encountered in Block Comment."
 ```
-E aqui um trecho da saída produzida pelo analisador léxico à maquina de pilha.
+E aqui um trecho da saída produzida pelo analisador léxico à maquina de pilha do arquivo `stack.cl`.
 ```
 #9 IF
 #9 OBJECTID i
@@ -222,7 +233,7 @@ E aqui um trecho da saída produzida pelo analisador léxico à maquina de pilha
 #10 ';'
 ```
 
-Saída produzida código teste3.cl.
+Saída produzida código testeFinal.cl.
 ```
 #3 ')'
 #3 ';'
@@ -254,26 +265,3 @@ Saída produzida código teste3.cl.
 #4 '}'
 #4 ';'
 ```
-Sobre os testes feitos no teste3.cl:
-
-**Classe Teste**
-
-**Métodos** 
- 
-- Teste 1: `testeMetodo` : Testa operadores aritméticos, palavras-chave, e comparações como let, if, else, then, fi, +, *, <=, entre outros.
-- Teste 2: `negacaoMetodo`: Realiza testes de negação lógica usando not e ~.
-- Teste 3: `stringMetodo` : Faz testes com strings e exibe valores string usando out_string.
-- Teste 4: `comparacaoMetodo` : Testa operadores de comparação, como < e =.
-- Teste 5: `testePontoMetodo` :Testa a chamada de métodos com ponto (.).
-- Teste 6: `novoMetodo` : Testa a criação de novos objetos com a palavra-chave new.
-- Teste 7: `dispatchMetodo` : Testa a chamada de métodos com @ (dispatch).
-
-**Classe TesteCompleto**
-
-**Métodos** 
-
-- Teste 8: `myFullTest`: Realiza um teste mais abrangente, verificando operadores aritméticos, controle de fluxo (if, while, case), e operadores lógicos.
-
-**Classe Main**
-
-- `Método main`: Ponto de entrada para a execução dos testes. Ele instancia as classes Teste e TesteCompleto, e chama os métodos de teste definidos nas classes anteriores, exibindo os resultados
