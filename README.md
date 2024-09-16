@@ -182,7 +182,7 @@ Abaixo está um trecho da saída final produzida pelo analizador léxico no arqu
 #7 POOL
 #7 ')'
 #7 ';'
-#12 ERROR "Error: EOF Encountered in Block Comment."
+#11 ERROR "Error: EOF Encountered in Block Comment."
 ```
 E aqui um trecho da saída produzida pelo analisador léxico à maquina de pilha.
 ```
@@ -215,4 +215,37 @@ E aqui um trecho da saída produzida pelo analisador léxico à maquina de pilha
 #9 ';'
 #10 '}'
 #10 ';'
+```
+
+Saída produzida código teste3.cl.
+```
+#3 ')'
+#3 ';'
+#3 OBJECTID out_string
+#3 '('
+#3 STR_CONST "Resultado do myFullTest: "
+#3 ')'
+#3 ';'
+#3 OBJECTID out_int
+#3 '('
+#3 OBJECTID testeCompletoObj
+#3 '.'
+#3 OBJECTID myFullTest
+#3 '('
+#3 INT_CONST 5
+#3 ')'
+#3 ')'
+#3 ';'
+#3 OBJECTID out_string
+#3 '('
+#3 STR_CONST "\n"
+#3 ')'
+#3 ';'
+#3 '}'
+#3 ';'
+#3 '}'
+#3 '}'
+#3 ';'
+#4 '}'
+#4 ';'
 ```
