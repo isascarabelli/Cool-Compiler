@@ -83,7 +83,7 @@ feature ::=
 	;
 ```
 
-Aqui podemos ver que para se analisar uma atribuição, é feita a chamada de `attribute:a` e em caso de negativa, é feita a avaliação se o que está sendo analisado é um método, com ou sem passagem de parâmetros. Abaixo está a avaliação de declarações:
+Aqui podemos ver que para se analisar uma atribuição de expressão, é feita a chamada de `attribute:a` e em caso de negativa, é feita a avaliação se o que está sendo analisado é um método, com ou sem passagem de parâmetros. Abaixo está a avaliação de declarações:
 
 ```
 attribute ::= OBJECTID:id1 COLON TYPEID:id2 SEMI
@@ -102,6 +102,34 @@ formal ::= OBJECTID:o COLON TYPEID:t
        ;
 ```
 
+Para as declarações de cada comparador de um `case`, temos o avaliador abaixo.
+
+```
+case_branch ::= OBJECTID:id1 COLON TYPEID:id2 DARROW expression:e SEMI
+	    {: RESULT=new branch(curr_lineno(), id1, id2, e); :}
+	    ;
+```
+
+Nesse trecho, é avaliado as expressões de cada uma das comparações feitas em um trecho de `switch-case` do COOL, que no caso é apenas `case`.
+
+Em COOL, o `let` é usado para avaliar expressões atribuindo-as em identificadores para utilizá-los no bloco do `let`. 
+
+```
+let_remainder ::= OBJECTID:id1 COLON TYPEID:id2 IN expression:e1
+	      {: RESULT=new let(curr_lineno(), id1, id2, new no_expr(curr_lineno()), e1); :}
+	      | OBJECTID:id1 COLON TYPEID:id2 ASSIGN expression:e1 IN expression:e2
+	      {: RESULT=new let(curr_lineno(), id1, id2, e1, e2); :}
+	      | OBJECTID:id1 COLON TYPEID:id2 COMMA let_remainder:e1
+	      {: RESULT=new let(curr_lineno(), id1, id2, new no_expr(curr_lineno()), e1); :}
+	      | OBJECTID:id1 COLON TYPEID:id2 ASSIGN expression:e1 COMMA let_remainder:e2
+	      {: RESULT=new let(curr_lineno(), id1, id2, e1, e2); :}
+
+	      // Error result for Let
+	      | error COMMA let_remainder
+	      ;
+```
+
+Nesse bloco de avaliações, é possível ver que no `let` devemos cobrir vários casos, sendo eles simples sem atribuição de expressão, simples com atribuição de expressão, multiplos sem atribuição de expressão e multiplos com atribuição de expressão.
 
 ## Testes
 
