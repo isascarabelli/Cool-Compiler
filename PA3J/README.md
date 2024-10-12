@@ -4,22 +4,103 @@
 
 1. [Descrição do Projeto](#descrição-do-projeto)
 2. [Como Funciona](#como-funciona)
-3. [Início do Programa](#início-do-programa)
-4. [Código](#código)
-5. [Testes](#testes)
+3. [Código](#código)
+4. [Testes](#testes)
 
 ## Descrição do Projeto
 
 Este projeto é um `Analisador Sintático` desenvolvido como parte do TP3 de Compiladores.
 O Analisador Léxico, também chamado de `Parser` é responsável por receber a sequência de tokens gerada pelo analisador léxico e gerar a árvore de parsing.
+No projeto do parser, temos por objetivo verificar se o programa de entrada, nesse caso o `lexer`, está sintaticamente correto. Outro objetivo é gerar uma `Árvore Sintática Abstrata (AST)`, que nada mais é do que uma representação condensada de uma árvore de derivação, onde será útil para representar a construção de nossa linguagem COOL. 
 
 ## Como Funciona
 
 
-## Início do Programa
-
-
 ## Código
+O programa se inicia com algumas funções pré defeinidas, que executam algumas tarefas como retornar a linha atual e indicar a linha em que há um erro. Quando essas funções são disparadas é tarefa da biblioteca `CUP` lidar no background. Outra parte do início do código é a declaração dos terminais, onde tudo que é interpretado pelo analisador léxico como terminal está presente aqui, para também ser considerado a medida que o arquivo é lido. Como podemos ver abaixo, todas as palavras reservadas e caracteres de uso da linguagem.
+
+```
+terminal CLASS, ELSE, FI, IF, IN, INHERITS, LET, LET_STMT, LOOP, POOL, THEN, WHILE;
+terminal CASE, ESAC, OF, DARROW, NEW, ISVOID;
+terminal ASSIGN, NOT, LE, ERROR;
+terminal PLUS, DIV, MINUS, MULT, EQ, LT, DOT, NEG, COMMA, SEMI, COLON;
+terminal LPAREN, RPAREN, AT, LBRACE, RBRACE;
+terminal AbstractSymbol STR_CONST, INT_CONST;
+terminal Boolean BOOL_CONST;
+terminal AbstractSymbol TYPEID, OBJECTID;
+```
+
+Em seguida, podemos verificar a declaração de não terminais a serem analisados.
+O não terminal raiz é o `nonterminal programc program`, onde a partir dele toda a AST será desenvolvida.
+
+Abaixo podemos verificar a forma como todo o processo de análise de fará através do código do parser. Como o `program` é a raiz, a partir dele que se desencadeará a análise. O processo de avaliação de expressões segue analisando a ou as classes do programa, onde o que foi avaliado será atribuido a `RESULT` que faz parte da implementação do `CUP` para uma pilha de parsing. E o que será imputado em `RESULT` será uma nova instância do que está sendo avaliado, com a linha atual e o que foi lido por essa avaliação.
+
+```
+program	
+	::= class_list:cl
+	    {: RESULT = new programc(curr_lineno(), cl); :}
+        ;
+```
+Um detalhe da implementação do `CUP` é que tudo o que se encontra entre `{: :}` será utilizado para conter todas as ações do parser.
+
+Na sequência, as declarações `nonterminal Classes class_list` e `nonterminal class_c class` são responsáveis por analisar as classes, onde será analisado uma ou várias classes.
+
+Vamos analisar a avaliação de uma expressão que declara uma `class`:
+
+```
+class
+	::= CLASS TYPEID:n LBRACE dummy_feature_list:f RBRACE SEMI
+	    {: RESULT = new class_c(curr_lineno(), n, 
+		                   AbstractTable.idtable.addString("Object"), 
+				   f, curr_filename()); :}
+	| CLASS TYPEID:n INHERITS TYPEID:p LBRACE dummy_feature_list:f RBRACE SEMI
+	    {: RESULT = new class_c(curr_lineno(), n, p, f, curr_filename()); :}
+	
+	| CLASS TYPEID error SEMI
+	| CLASS TYPEID INHERITS TYPEID error SEMI
+	| error
+	;
+```
+
+Aqui podemos verificar melhor como é feita a avaliação de expressões. No trecho `CLASS TYPEID:n LBRACE dummy_feature_list:f RBRACE SEMI` é verificado se o que está sendo lido tem esse formato, com uma classe com identificador, uma abertura de chaves, um não terminal, um fechamento de chaves e um `;`. Caso não seja possível que se enquadre nesse formato, a verificação `CLASS TYPEID:n INHERITS TYPEID:p LBRACE dummy_feature_list:f RBRACE SEMI` é feita e seguirá até que, ou resulte em sucesso, ou um `error` é identificado.
+Isso descreve exatamente como uma classe deve ser declarada, o que em caso de sucesso, realiza uma ação de empilhar em `RESULT` uma nova classe, passando a linha, o identificador da classe, uma chamada de método para adicionar esse identificador na tabela dos IDS, o identificador do não terminal e o nome do arquivo.
+
+Veremos que o padrão descrito acima será recorrente em todas as avaliações de expressões, mudando apenas o que será avaliado e o que será empilhado em `RESULT`.
+
+Em seguida temos as avaliações dos métodos e atribuições contidos no programa, declarados como os não terminais `nonterminal Features dummy_feature_list, nonterminal Features features, nonterminal Feature feature`. O não terminal `dummy_feature_list` é usado em caso de haver métodos vazios. O restante lida com um ou vários métodos presentes no programa. Abaixo podemos ver todas as formas das expressões avaliadas:
+
+```
+feature ::= 
+	attribute:a
+	{: RESULT=a; :}
+	| OBJECTID:id1 LPAREN RPAREN COLON TYPEID:id2 LBRACE expression:e RBRACE SEMI
+	{: RESULT=new method(curr_lineno(), id1, new Formals(curr_lineno()), id2, e); :}
+	| OBJECTID:id1 LPAREN formals:f RPAREN COLON TYPEID:id2 LBRACE expression:e RBRACE SEMI
+	{: RESULT=new method(curr_lineno(), id1, f, id2, e); :}
+
+	// Error cases for invalid functions identifier
+	| error SEMI
+	;
+```
+
+Aqui podemos ver que para se analisar uma atribuição, é feita a chamada de `attribute:a` e em caso de negativa, é feita a avaliação se o que está sendo analisado é um método, com ou sem passagem de parâmetros. Abaixo está a avaliação de declarações:
+
+```
+attribute ::= OBJECTID:id1 COLON TYPEID:id2 SEMI
+	  {: RESULT=new attr(curr_lineno(), id1, id2, new no_expr(curr_lineno())); :}
+	  | OBJECTID:id1 COLON TYPEID:id2 ASSIGN expression:e SEMI
+	  {: RESULT=new attr(curr_lineno(), id1, id2, new no_expr(curr_lineno())); :}
+	  | error SEMI
+	  ;
+```
+
+Também foi construído um analisador de parâmetros formais dos métodos, dados por `nonterminal Formals formals, nonterminal formalc formal`, onde `formals` é a declaração de múltiplos parâmetros e `formal` é de apenas um. Segue abaixo a avaliação de um `formal`:
+
+```
+formal ::= OBJECTID:o COLON TYPEID:t
+       {: RESULT=new formalc(curr_lineno(), o, t); :}
+       ;
+```
 
 
 ## Testes
