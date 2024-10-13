@@ -30,6 +30,23 @@ terminal Boolean BOOL_CONST;
 terminal AbstractSymbol TYPEID, OBJECTID;
 ```
 
+Um ponto muito importante nas linguagem de programação no geral são as declarações de precedência. Sem as precedências definidas corretamente, poderia ser possível gerar duas árvores diferentes dependendo da definição, sendo ela mais à direita ou mais à esquerda. Como exemplo, a expressão `3 + 4 * 5` pode gerar duas árvores diferentes. Uma que avalia primeiro `3 + 4` e em seguida `7 * 5` e outra que avalia primeiro `4 * 5` e em seguida `3 + 20`. Sabemos que esta última é a correta, porém precisamos descrever isso para o compilador funcionar corretamente. Abaixo, as precedências definidas:
+
+```
+precedence left NOT;
+precedence nonassoc LE, LT, EQ;
+precedence left MINUS, PLUS;
+precedence left MULT, DIV;
+precedence left ISVOID;
+precedence left NEG;
+precedence left AT;
+precedence left DOT;
+```
+
+A operação que sempre será realizada primeiro será a mais abaixo, da esquerda para a direita. Em cool, é definido pelo manual da linguagem que a operação mais prioritária seja o `DOT` e a menos prioritária seja o `NOT`. Detalhe importante de ressaltar é que `MULT, DIV` está abaixo de `MINUS, PLUS`, solucionando o problema citado acima e garantindo que sempre tenhamos uma avaliação e resultado corretos.
+
+Com as declarações de precedência definidas, asseguramos que a derivação ocorra da maneira que queremos e que tudo siga a ordem pré-estabelecida pelas boas práticas e pelo senso comum.
+
 Em seguida, podemos verificar a declaração de não terminais a serem analisados.
 O não terminal raiz é o `nonterminal programc program`, onde a partir dele toda a AST será desenvolvida.
 
@@ -130,6 +147,36 @@ let_remainder ::= OBJECTID:id1 COLON TYPEID:id2 IN expression:e1
 ```
 
 Nesse bloco de avaliações, é possível ver que no `let` devemos cobrir vários casos, sendo eles simples sem atribuição de expressão, simples com atribuição de expressão, multiplos sem atribuição de expressão e multiplos com atribuição de expressão.
+
+As últimas definições são as que avaliam as expressões da linguagem. As expressões são tudo que se encontram em blocos de classes ou métodos, além de também ser possível atribuir o resultado de uma expressão à uma variável. Vamos a alguns exemplos:
+
+Abaixo, uma das expressões mais simples, avalia a soma e subtração respectivamente de outras duas expressões.
+
+```
+	   | expression:e1 PLUS expression:e2
+	   {: RESULT=new plus(curr_lineno(), e1, e2); :}
+
+	   | expression:e1 MINUS expression:e2
+	   {: RESULT=new sub(curr_lineno(), e1, e2); :}
+```
+
+Importante lembrar que, uma expressão pode também ser um identificador de uma variável, como declarado abaixo:
+
+```
+	   | OBJECTID:t
+	   {: RESULT=new object(curr_lineno(), t); :}
+```
+
+Outra expressão que é avaliada é a de estruturas condicionais e de repetição, que em COOL é o `IF statement` e o `WHILE LOOP`.
+```
+           | IF expression:e1 THEN expression:e2 ELSE expression:e3 FI
+	   {: RESULT=new cond(curr_lineno(), e1, e2, e3); :}
+
+	   | WHILE expression:e1 LOOP expression:e2 POOL
+	   {: RESULT=new loop(curr_lineno(), e1, e2); :}
+```
+
+Muitas outras expressões são avaliadas, como as de `CASE`, `LET`, chamada de atributo de uma classe, operações e comparações.
 
 ## Testes
 
