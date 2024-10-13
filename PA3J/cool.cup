@@ -56,7 +56,7 @@ terminal AbstractSymbol TYPEID, OBJECTID;
 /**************************************************************************/
 
    /* Complete the nonterminal list below, giving a type for the semantic
-      value of each non terminal. (See the CUP documentation for details. */
+      value of each non terminal. (See the CUP documentation for details.) */
 
 nonterminal programc program;
 nonterminal Classes class_list;
@@ -400,6 +400,6 @@ expression ::=
 	   | BOOL_CONST:i
 	   {: RESULT=new bool_const(curr_lineno(), i); :}
 
-	   // Else pass back an error
-	   //| error 
+	   // Else, error
+	   | error 
 	   ;
