@@ -179,7 +179,7 @@ Outra expressão que é avaliada é a de estruturas condicionais e de repetiçã
 Muitas outras expressões são avaliadas, como as de `CASE`, `LET`, chamada de atributo de uma classe, operações e comparações.
 
 ## Testes
-# good.cl
+### good.cl
 Arquivo criado para testar toda e qualquer construção legal da linguagem cool. Nele foram desenvolvidos partes de código que passarão pelo analisador léxico, para verficarmos a Árvore Sintática Abstrata (AST) gerada e se nosso analisador identifica diversas estruturas válidas em cool. 
 
 Reutilizamos o código criado para o TP1 de um dos integrantes, que funiona como uma pilha em cool. Usamos ele como base para testar estruturas de classe, funções, loops, atribuições, comparações e blocos.
