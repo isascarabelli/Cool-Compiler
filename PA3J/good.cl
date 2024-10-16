@@ -1,9 +1,9 @@
 -- Declaration classes 
 class Stack {
 
-   top : String;   -- The top element of the stack
+   top : String;   
 
-   next : Stack;  -- The rest of the stack
+   next : Stack; 
 
    isNil() : Bool { false };
 
@@ -25,6 +25,7 @@ class Stack {
 
 };
 
+-- Operators 
 class Math {
 	f() : Int {
 		{
@@ -49,17 +50,28 @@ class Math {
 	};
 };
 
--- Ambiguidade de Heranca e Sobrescrita ---------------------------------------------------------------------------
+-- Ambiguity of Inheritance and Overwriting (Dispatch)---------------------------------------------------------------------------
 
 class A {
-    foo() : Int { 42 };
+	-- Testing if identifiers introduced by let hide any definitions for the same names in outer scopes
+	testLet() : Int {
+        let x : Int <- 5 in  -- x defined in the outer scope
+            let x : Int <- 10 in  -- x defined in the inner scope
+                io.out_int(x);  -- Here, x is 10, the inner definition is used
+            io.out_int(x);  -- Here, it is still 10
+        io.out_int(x);  -- Here, x is 5, the outer definition is used
+        0
+    };
+
+	foo() : Int { 42 };
 };
 
 class B inherits A {
-    foo() : Int { 100 };  -- Sobrescrevendo corretamente o metodo com o mesmo tipo de retorno
+    foo() : Int { 100 }; 
     bar() : Int { foo() + 10 };
     test() : IO {
-        let b : B <- new B in out_int(b.bar()).out_newline()
+        let b : B <- new B in 
+			out_int(b.bar()).out_newline();
     }
 };
 
@@ -80,12 +92,11 @@ class Main inherits Stack {
 		{
 			ch <- (new IO).in_string();
 
-			--checking the inputs and acting according to each letter
 			while not (ch = "x") loop  
             {
-				
+				-- checking if-then-else inside if-then-else structure
                if ch = "e" then {
-					if stack.head() = "-1" then "Do Nothing" -- checking if it is the bottom of the stack
+					if stack.head() = "-1" then "Do Nothing" 
 					else {
 						ch <- stack.head();
 						stack <- stack.tail();
@@ -100,7 +111,6 @@ class Main inherits Stack {
 							stack <- stack.tail();
 							n <- c2i(p);
 							
-						-- When the program tries to sum with only one element in the stack, it aborts
 							result <- m + n;
 							p <- i2c(result);
 							stack <- stack.push(p);
@@ -128,7 +138,7 @@ class Main inherits Stack {
                 {stack <- stack.push(ch); "Erro";}
                 fi fi;
                
-			    ch <- (new IO).in_string();  -- Read the next input
+			    ch <- (new IO).in_string();  
             } pool;
 		}
 	};
@@ -156,7 +166,7 @@ class Main inherits Stack {
         	if char = "7" then 7 else
         	if char = "8" then 8 else
         	if char = "9" then 9 else
-        	{ abort(); 0; }  -- the 0 is needed to satisfy the typchecker
+        	{ abort(); 0; } 
         	fi fi fi fi fi fi fi fi fi fi
        };
 
@@ -172,8 +182,7 @@ class Main inherits Stack {
         	if i = 7 then "7" else
         	if i = 8 then "8" else
         	if i = 9 then "9" else
-        	{ abort(); ""; }  -- the "" is needed to satisfy the typchecker
+        	{ abort(); ""; }  
         	fi fi fi fi fi fi fi fi fi fi
      };
 };
-
