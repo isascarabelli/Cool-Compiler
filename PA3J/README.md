@@ -228,27 +228,27 @@ Além dessas construções, construímos algumas expressões e estruturas de blo
 Ver como o anaisador semântico se comporta com precedência de operadores.
 ```
 class Math {
-	f() : Int {
-		{
-			a+b-c;
-			a-b+c;
+    f() : Int {
+        {
+	   a+b-c;
+	   a-b+c;
 
-			a+b*c;
-			a*b+c;
+           a+b*c;
+           a*b+c;
 
-			a+b/c;
-			a/b+c;
+	   a+b/c;
+	   a/b+c;
 
-			a-b*c;
-			a*b-c;
+	   a-b*c;
+	   a*b-c;
 
-			a-b/c;
-			a/b-c;
+           a-b/c;
+	   a/b-c;
 
-			a*b/c;
-			a/b*c;
-		}
-	};
+           a*b/c;
+	   a/b*c;
+        }
+     };
 };
 ```
 #### Herança e Sobrescrita (Dispatch)
@@ -285,43 +285,43 @@ class A {
 Observar como funciona a amarração de cada bloco (tal 'else' faz parte do bloco If-Then-Else mais interno ou do bloco mais externo?).
 ```
 if ch = "e" then {
-	if stack.head() = "-1" then "Do Nothing"
-    	else {
-		ch <- stack.head();
-		stack <- stack.tail();
+    if stack.head() = "-1" then "Do Nothing"
+    else {
+         ch <- stack.head();
+         stack <- stack.tail();
 
-		if ch = "+" then {
-			p <- stack.head();
-			stack <- stack.tail();
-			m <- c2i(p);
+	 if ch = "+" then {
+	    p <- stack.head();
+	    stack <- stack.tail();
+	    m <- c2i(p);
 
-			p <- stack.head();
-			stack <- stack.tail();
-			n <- c2i(p);
+	    p <- stack.head();
+	    stack <- stack.tail();
+	    n <- c2i(p);
 							
-			result <- m + n;
-			p <- i2c(result);
-			stack <- stack.push(p);
-		}
-		else
-		if ch = "s" then {
-			p <- stack.head();
-			stack <- stack.tail();
+	    result <- m + n;
+	    p <- i2c(result);
+            stack <- stack.push(p);
+         }
+	 else
+	 if ch = "s" then {
+	     p <- stack.head();
+             stack <- stack.tail();
 
-			q <- stack.head();
-			stack <- stack.tail();
-			stack <- stack.push(p);
-			stack <- stack.push(q);
-		}
-		else
-			{ stack <- stack.push(ch); }
-		fi 
-		fi;
-		}
-		fi;
-	} else 
+             q <- stack.head();
+             stack <- stack.tail();
+             stack <- stack.push(p);
+             stack <- stack.push(q);
+          }
+	  else
+             { stack <- stack.push(ch); }
+          fi 
+	  fi;
+	  }
+	  fi;
+} else 
 			    
-	if ch = "d" then print_stack(stack) else
-	{stack <- stack.push(ch); "Erro";}
-	fi fi;
+if ch = "d" then print_stack(stack) else
+{stack <- stack.push(ch); "Erro";}
+fi fi;
 ```
