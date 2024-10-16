@@ -59,7 +59,7 @@ class B inherits A {
     foo() : Int { 100 };  -- Sobrescrevendo corretamente o metodo com o mesmo tipo de retorno
     bar() : Int { foo() + 10 };
     test() : IO {
-        let b : B <- new B in out_int(b.bar()).out_newline();
+        let b : B <- new B in out_int(b.bar()).out_newline()
     }
 };
 
