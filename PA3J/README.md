@@ -224,7 +224,7 @@ stack : Stack <- new Stack.init("-1", nil);
 
 Além dessas construções, construímos algumas expressões e estruturas de blocos que poderiam gerar ambiguidade, para ver se elas se comportariam conforme descrito no Manual de Referência da linguagem.
 
-# Operações matemáticas
+##### Operações matemáticas
 Ver como o anaisador semântico se comporta com precedência de operadores.
 ```
 class Math {
@@ -251,7 +251,7 @@ class Math {
 	};
 };
 ```
-# Herança e Sobrescrita (Dispatch)
+##### Herança e Sobrescrita (Dispatch)
 Sobrescrita de funções em classes com herança testando qual delas ele considera. No caso do exemplo abaixo, o valor impresso deveria ser 110.
 ```
 class A {
@@ -267,7 +267,7 @@ class B inherits A {
     }
 };
 ```
-# Amarração de varíavéis em escopos diferentes
+##### Amarração de varíavéis em escopos diferentes
 A linguagem cool permite que variáveis em escopos diferentes possuam o mesmo identificador. Devido a isso, variáveis com o mesmo nome deverão ser amarradas aos escopos mais internos.  
 ```
 class A {
@@ -281,7 +281,7 @@ class A {
     };
 };
 ```
-# If-Then-Else dentro de blocos de outro If-Then-Else
+##### If-Then-Else dentro de blocos de outro If-Then-Else
 Observar como funciona a amarração de cada bloco (tal 'else' faz parte do bloco If-Then-Else mais interno ou do bloco mais externo?).
 ```
 if ch = "e" then {
