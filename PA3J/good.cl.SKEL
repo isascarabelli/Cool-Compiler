@@ -25,6 +25,30 @@ class Stack {
 
 };
 
+class Math {
+	f() : Int {
+		{
+			a+b-c;
+			a-b+c;
+
+			a+b*c;
+			a*b+c;
+
+			a+b/c;
+			a/b+c;
+
+			a-b*c;
+			a*b-c;
+
+			a-b/c;
+			a/b-c;
+
+			a*b/c;
+			a/b*c;
+		}
+	};
+};
+
 -- Ambiguidade de Heranca e Sobrescrita ---------------------------------------------------------------------------
 
 class A {
@@ -40,7 +64,7 @@ class B inherits A {
 };
 
 
--- Main and (atribuicoes, loops e comparacoes) -----------------------------------------------------------------------
+-- Main e (atribuicoes, loops e comparacoes) -----------------------------------------------------------------------
 
 class Main inherits Stack {
 	ch : String;
