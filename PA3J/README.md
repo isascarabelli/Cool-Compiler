@@ -215,11 +215,11 @@ class Stack {
 ```
 - Declarações e atribuições
 ```
-	n : Int;
-	m : Int;
-	result : Int;
-	nil : Stack;
-	stack : Stack <- new Stack.init("-1", nil);
+n : Int;
+m : Int;
+result : Int;
+nil : Stack;
+stack : Stack <- new Stack.init("-1", nil);
 ```
 
 Além dessas construções, construímos algumas expressões e estruturas de blocos que poderiam gerar ambiguidade, para ver se elas se comportariam conforme descrito no Manual de Referência da linguagem.
