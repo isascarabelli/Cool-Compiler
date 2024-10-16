@@ -179,4 +179,148 @@ Outra expressão que é avaliada é a de estruturas condicionais e de repetiçã
 Muitas outras expressões são avaliadas, como as de `CASE`, `LET`, chamada de atributo de uma classe, operações e comparações.
 
 ## Testes
+# good.cl
+Arquivo criado para testar toda e qualquer construção legal da linguagem cool. Nele foram desenvolvidos partes de código que passarão pelo analisador léxico, para verficarmos a Árvore Sintática Abstrata (AST) gerada e se nosso analisador identifica diversas estruturas válidas em cool. 
 
+Reutilizamos o código criado para o TP1 de um dos integrantes, que funiona como uma pilha em cool. Usamos ele como base para testar estruturas de classe, funções, loops, atribuições, comparações e blocos.
+Exemplos:
+- Classes e funções
+```
+class Stack {
+
+   top : String;   
+
+   next : Stack; 
+
+   isNil() : Bool { false };
+
+   head()  : String { top };
+
+   tail()  : Stack { next };
+
+   push(i: String): Stack {
+       (new Stack).init(i, self)
+   };
+
+   init(i : String, r : Stack) : Stack {
+      {
+         top <- i;
+         next <- r;
+         self;
+      }
+   };
+
+};
+```
+- Declarações e atribuições
+```
+	n : Int;
+	m : Int;
+	result : Int;
+	nil : Stack;
+	stack : Stack <- new Stack.init("-1", nil);
+```
+
+Além dessas construções, construímos algumas expressões e estruturas de blocos que poderiam gerar ambiguidade, para ver se elas se comportariam conforme descrito no Manual de Referência da linguagem.
+
+# Operações matemáticas
+Ver como o anaisador semântico se comporta com precedência de operadores.
+```
+class Math {
+	f() : Int {
+		{
+			a+b-c;
+			a-b+c;
+
+			a+b*c;
+			a*b+c;
+
+			a+b/c;
+			a/b+c;
+
+			a-b*c;
+			a*b-c;
+
+			a-b/c;
+			a/b-c;
+
+			a*b/c;
+			a/b*c;
+		}
+	};
+};
+```
+# Herança e Sobrescrita (Dispatch)
+Sobrescrita de funções em classes com herança testando qual delas ele considera. No caso do exemplo abaixo, o valor impresso deveria ser 110.
+```
+class A {
+    foo() : Int { 42 };
+};
+
+class B inherits A {
+    foo() : Int { 100 }; 
+    bar() : Int { foo() + 10 };
+    test() : IO {
+        let b : B <- new B in 
+		out_int(b.bar()).out_newline();
+    }
+};
+```
+# Amarração de varíavéis em escopos diferentes
+A linguagem cool permite que variáveis em escopos diferentes possuam o mesmo identificador. Devido a isso, variáveis com o mesmo nome deverão ser amarradas aos escopos mais internos.  
+```
+class A {
+	testLet() : Int {
+        let x : Int <- 5 in  
+            let x : Int <- 10 in  
+                io.out_int(x);  -- Valor de X = 10
+            io.out_int(x);  -- Valor de X = 10
+        io.out_int(x);  -- Valor de X = 5
+        0
+    };
+};
+```
+# If-Then-Else dentro de blocos de outro If-Then-Else
+Observar como funciona a amarração de cada bloco (tal 'else' faz parte do bloco If-Then-Else mais interno ou do bloco mais externo?).
+```
+if ch = "e" then {
+	if stack.head() = "-1" then "Do Nothing"
+    	else {
+		ch <- stack.head();
+		stack <- stack.tail();
+
+		if ch = "+" then {
+			p <- stack.head();
+			stack <- stack.tail();
+			m <- c2i(p);
+
+			p <- stack.head();
+			stack <- stack.tail();
+			n <- c2i(p);
+							
+			result <- m + n;
+			p <- i2c(result);
+			stack <- stack.push(p);
+		}
+		else
+		if ch = "s" then {
+			p <- stack.head();
+			stack <- stack.tail();
+
+			q <- stack.head();
+			stack <- stack.tail();
+			stack <- stack.push(p);
+			stack <- stack.push(q);
+		}
+		else
+			{ stack <- stack.push(ch); }
+		fi 
+		fi;
+		}
+		fi;
+	} else 
+			    
+	if ch = "d" then print_stack(stack) else
+	{stack <- stack.push(ch); "Erro";}
+	fi fi;
+```
