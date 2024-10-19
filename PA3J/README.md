@@ -253,9 +253,9 @@ class Math {
 ```
 Parte da saída da Árvore Sintática:
 
-![image](https://github.com/user-attachments/assets/b1600b12-bdb3-461e-86ce-82ebaa55aef9)
+![image](https://github.com/user-attachments/assets/b1600b12-bdb3-461e-86ce-82ebaa55aef9) - "a+b-c" e "a-b+c"
 
-![image](https://github.com/user-attachments/assets/8f0a5575-f816-4c85-a932-ca6d1a622bf0)
+![image](https://github.com/user-attachments/assets/8f0a5575-f816-4c85-a932-ca6d1a622bf0) - 1 + 2 * (3 + 4) / (5 - ~6)
 
 Conforme esperado, ele segue a precedência colocando os mais prioritários em um nível mais abaixo da árvore.
 
