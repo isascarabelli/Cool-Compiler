@@ -252,7 +252,9 @@ class Math {
 };
 ```
 Parte da saída da Árvore Sintática:
+
 ![image](https://github.com/user-attachments/assets/b1600b12-bdb3-461e-86ce-82ebaa55aef9)
+
 ![image](https://github.com/user-attachments/assets/8f0a5575-f816-4c85-a932-ca6d1a622bf0)
 
 Conforme esperado, ele segue a precedência colocando os mais prioritários em um nível mais abaixo da árvore.
@@ -274,6 +276,7 @@ class B inherits A {
 };
 ```
 Parte da AST:
+
 ![image](https://github.com/user-attachments/assets/dda1ebd1-e9ff-4686-8e1e-02796685e76a)
 
 Vemos o uso do dispatch indicando que a função vem de outro tipo.
@@ -293,6 +296,7 @@ class A {
 };
 ```
 Saída da AST:
+
 ![image](https://github.com/user-attachments/assets/e794b491-496a-4bb0-b0d6-cac206a1924d)
 
 #### If-Then-Else dentro de blocos de outro If-Then-Else
@@ -340,5 +344,6 @@ if ch = "d" then print_stack(stack) else
 fi fi;
 ```
 Saída da AST:
+
 ![image](https://github.com/user-attachments/assets/94705104-ee65-401c-a68d-b2d577d154ad)
 
