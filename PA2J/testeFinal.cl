@@ -1,6 +1,7 @@
 class Teste inherits IO {
 
   testeMetodo(a: Int) : Int {  
+    let a: Int <- 5;
     let y: Int <- a + 10;  
     if y <= 100 then         
       y <- y * 10;
@@ -8,7 +9,7 @@ class Teste inherits IO {
       y <- y / 2;
     fi;                      
     y <- y - 1;              
-    y;  -- Corrigido: retorna y no final
+    y;  
   };
 
 
@@ -16,7 +17,7 @@ class Teste inherits IO {
     let s: String <- "PA2 Compiladores"; 
     out_string(s);
     out_string("Short string test");
-    s;  -- Corrigido: retorna s no final
+    s;  
   };
 
   comparacaoMetodo() : Bool {
@@ -33,14 +34,13 @@ class Teste inherits IO {
 
   novoMetodo() : Teste {
     let obj: Teste <- new Teste; 
-    obj;  -- Retorna o novo objeto
+    obj;  
   };
 
-  dispatchMetodo() : Int {
+dispatchMetodo() : Int {
     let obj: IO <- new IO;  
-    obj@IO.out_string("Chamando metodo para dispatch.");
-    0; 
-  };
+    obj.out_string("Chamando metodo para dispatch.");  
+    0;
 };
 
 class TesteCompleto inherits IO {
@@ -61,7 +61,7 @@ class TesteCompleto inherits IO {
     esac;
     y <- (if isvoid y then 0 else ~y fi);  
     out_string("Teste finalizado");
-    y;  -- Corrigido: retorna y no final
+    y;  
   };
 };
 
