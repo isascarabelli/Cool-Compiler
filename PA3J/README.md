@@ -176,7 +176,7 @@ Muitas outras expressões são avaliadas, como as de `CASE`, `LET`, chamada de a
 
 ## Testes
 ### good.cl
-Arquivo criado para testar toda e qualquer construção legal da linguagem cool. Nele foram desenvolvidos partes de código que passarão pelo analisador léxico, para verficarmos a Árvore Sintática Abstrata (AST) gerada e se nosso analisador identifica diversas estruturas válidas em cool. 
+Arquivo criado para testar toda e qualquer construção legal da linguagem cool. Nele foram desenvolvidos partes de código que passarão pelo analisador sintático, para verficarmos a Árvore Sintática Abstrata (AST) gerada e se nosso analisador identifica diversas estruturas válidas em cool. 
 
 Reutilizamos o código criado para o TP1 de um dos integrantes, que funiona como uma pilha em cool. Usamos ele como base para testar estruturas de classe, funções, loops, atribuições, comparações e blocos.
 
@@ -184,6 +184,8 @@ Exemplos:
 - Classes e funções
 ```
 class Stack {
+
+   x : SELF_TYPE;
 
    top : String;   
 
@@ -221,7 +223,7 @@ stack : Stack <- new Stack.init("-1", nil);
 Além dessas construções, construímos algumas expressões e estruturas de blocos que poderiam gerar ambiguidade, para ver se elas se comportariam conforme descrito no Manual de Referência da linguagem.
 
 #### Operações matemáticas
-Ver como o anaisador semântico se comporta com precedência de operadores.
+Ver como o analisador sintático se comporta com precedência de operadores.
 ```
 class Math {
     f() : Int {
@@ -243,12 +245,20 @@ class Math {
 
            a*b/c;
 	   a/b*c;
+
+	   1 + 2 * (3 + 4) / (5 - ~6);
         }
      };
 };
 ```
+Parte da saída da Árvore Sintática:
+![image](https://github.com/user-attachments/assets/b1600b12-bdb3-461e-86ce-82ebaa55aef9)
+![image](https://github.com/user-attachments/assets/8f0a5575-f816-4c85-a932-ca6d1a622bf0)
+
+Conforme esperado, ele segue a precedência colocando os mais prioritários em um nível mais abaixo da árvore.
+
 #### Herança e Sobrescrita (Dispatch)
-Sobrescrita de funções em classes com herança testando qual delas ele considera. No caso do exemplo abaixo, o valor impresso deveria ser 110.
+Sobrescrita de funções em classes com herança testando qual delas ele considera.
 ```
 class A {
     foo() : Int { 42 };
@@ -263,6 +273,11 @@ class B inherits A {
     }
 };
 ```
+Parte da AST:
+![image](https://github.com/user-attachments/assets/dda1ebd1-e9ff-4686-8e1e-02796685e76a)
+
+Vemos o uso do dispatch indicando que a função vem de outro tipo.
+
 #### Amarração de varíavéis em escopos diferentes
 A linguagem cool permite que variáveis em escopos diferentes possuam o mesmo identificador. Devido a isso, variáveis com o mesmo nome deverão ser amarradas aos escopos mais internos.  
 ```
@@ -277,6 +292,9 @@ class A {
     };
 };
 ```
+Saída da AST:
+![image](https://github.com/user-attachments/assets/e794b491-496a-4bb0-b0d6-cac206a1924d)
+
 #### If-Then-Else dentro de blocos de outro If-Then-Else
 Observar como funciona a amarração de cada bloco (tal 'else' faz parte do bloco If-Then-Else mais interno ou do bloco mais externo?).
 ```
@@ -321,3 +339,6 @@ if ch = "d" then print_stack(stack) else
 {stack <- stack.push(ch); "Erro";}
 fi fi;
 ```
+Saída da AST:
+![image](https://github.com/user-attachments/assets/94705104-ee65-401c-a68d-b2d577d154ad)
+
