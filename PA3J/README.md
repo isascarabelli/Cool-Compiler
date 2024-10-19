@@ -3,18 +3,14 @@
 ## Índice
 
 1. [Descrição do Projeto](#descrição-do-projeto)
-2. [Como Funciona](#como-funciona)
-3. [Código](#código)
-4. [Testes](#testes)
+2. [Código](#código)
+3. [Testes](#testes)
 
 ## Descrição do Projeto
 
 Este projeto é um `Analisador Sintático` desenvolvido como parte do TP3 de Compiladores.
 O Analisador Léxico, também chamado de `Parser` é responsável por receber a sequência de tokens gerada pelo analisador léxico e gerar a árvore de parsing.
 No projeto do parser, temos por objetivo verificar se o programa de entrada, nesse caso o `lexer`, está sintaticamente correto. Outro objetivo é gerar uma `Árvore Sintática Abstrata (AST)`, que nada mais é do que uma representação condensada de uma árvore de derivação, onde será útil para representar a construção de nossa linguagem COOL. 
-
-## Como Funciona
-
 
 ## Código
 O programa se inicia com algumas funções pré defeinidas, que executam algumas tarefas como retornar a linha atual e indicar a linha em que há um erro. Quando essas funções são disparadas é tarefa da biblioteca `CUP` lidar no background. Outra parte do início do código é a declaração dos terminais, onde tudo que é interpretado pelo analisador léxico como terminal está presente aqui, para também ser considerado a medida que o arquivo é lido. Como podemos ver abaixo, todas as palavras reservadas e caracteres de uso da linguagem.
