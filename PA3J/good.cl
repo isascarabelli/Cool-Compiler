@@ -1,5 +1,6 @@
 -- Declaration classes 
 class Stack {
+   x : SELF_TYPE;
 
    top : String;   
 
@@ -46,6 +47,8 @@ class Math {
 
 			a*b/c;
 			a/b*c;
+
+            1 + 2 * (3 + 4) / (5 - ~6);
 		}
 	};
 };
@@ -56,11 +59,10 @@ class A {
 	-- Testing if identifiers introduced by let hide any definitions for the same names in outer scopes
 	testLet() : Int {
         let x : Int <- 5 in  -- x defined in the outer scope
-            let x : Int <- 10 in  -- x defined in the inner scope
-                io.out_int(x);  -- Here, x is 10, the inner definition is used
-            io.out_int(x);  -- Here, it is still 10
-        io.out_int(x);  -- Here, x is 5, the outer definition is used
-        0
+        {
+                let x : Int <- 10 in x;  -- Here, x is 10, the inner definition is used
+                x;  -- Here, x is 5, the outer definition is used
+        }
     };
 
 	foo() : Int { 42 };
@@ -71,8 +73,8 @@ class B inherits A {
     bar() : Int { foo() + 10 };
     test() : IO {
         let b : B <- new B in 
-			out_int(b.bar()).out_newline();
-    }
+			b.bar()
+    };
 };
 
 
