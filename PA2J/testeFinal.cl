@@ -1,7 +1,7 @@
 class Teste inherits IO {
 
   testeMetodo(a: Int) : Int {  
-    let y: Int <- a + 10;
+    let y: Int = a + 10;
     if y <= 100 then         
       y <- y * 10;
     else                     
@@ -13,7 +13,6 @@ class Teste inherits IO {
 
   negacaoMetodo() : Bool {
     let b: Bool <- not true;
-    b <- ~b;
     b;
   };
 
@@ -27,14 +26,13 @@ class Teste inherits IO {
   comparacaoMetodo() : Bool {
     let a: Int <- 20;
     let b: Int <- 25;
-    a < b;
-    a = b;
     a < b and a = b;
   };
 
   testePontoMetodo() : String {
     out_string("Chamando metodo usando ponto.");
     out_string("Outra chamada de metodo.");
+    "Chamadas finalizadas.";
   };
 
   novoMetodo() : Teste {
@@ -65,7 +63,7 @@ class TesteCompleto inherits IO {
       0: y <- 10;
       1: y <- 20;
     esac;
-    y <- isvoid y + ~y;
+    y <- (if isvoid y then 0 else ~y fi);
     out_string("Teste finalizado");
     y;
   };
@@ -93,8 +91,8 @@ class Main inherits IO {
         out_string("\n");
 
         out_string("\nTeste 4: testando operadores de comparacao\n");
-        out_string("Resultado do ComparacaoMetodo: ");
-        out_bool(testeObj.ComparacaoMetodo());
+        out_string("Resultado do comparacaoMetodo: ");
+        out_bool(testeObj.comparacaoMetodo());
         out_string("\n");
 
         out_string("\nTeste 5: testando chamada de metodo com ponto\n");
