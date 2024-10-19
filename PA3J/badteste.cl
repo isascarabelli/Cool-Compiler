@@ -1,6 +1,6 @@
 class Main {
     main() : Int {
-        # inválido; Cool não reconhece o caractere `#`
+        #;  
         0;
     }
 };
