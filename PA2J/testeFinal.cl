@@ -1,7 +1,7 @@
 class Teste inherits IO {
 
   testeMetodo(a: Int) : Int {  
-    let y: Int = a + 10;
+    let y: Int <- a + 10;
     if y <= 100 then         
       y <- y * 10;
     else                     
