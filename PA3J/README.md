@@ -382,7 +382,7 @@ Resposta do Parser:
 ![image](https://github.com/user-attachments/assets/7a87579b-f206-4086-bd97-a7aed1d12723)
 
 #### Classe ControlFlow
-Na expressão if, é necessário que na sua estrutura tenha uma bloco else.
+Na expressão if, é necessário que na sua estrutura termine com a palavra reservada fi.
 Na expressão while, é necessário a presença do bloco pool para encerrar o loop. 
 
 ```
