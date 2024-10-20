@@ -347,3 +347,7 @@ Saída da AST:
 
 ![image](https://github.com/user-attachments/assets/94705104-ee65-401c-a68d-b2d577d154ad)
 
+### bad.cl
+Arquivo criado para testar erros sintáticos da linguagem cool. Foram desenvolvidos trechos de código simples, porém contendo erros, com o objetivo de observar como o analisador sintático se comporta diante os erros. 
+
+Foram reutilizados trechos do código good.cl, teste.cl do analisador léxico, e foram criados outros trechos para a criação desse arquivo teste. 
