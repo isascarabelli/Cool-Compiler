@@ -78,7 +78,7 @@ class CaseError {
 
 class LetError {
     letTest() : Int {
-        let x : Int in x; 
+        let x : Int in x
         let y in y + 1;  
     }
 };
