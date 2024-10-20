@@ -557,3 +557,4 @@ class ReservedWordError {
 ```
 
 Resposta do Parser:
+![image](https://github.com/user-attachments/assets/c0da6156-f86c-43c9-ab23-04d6326cf483)
