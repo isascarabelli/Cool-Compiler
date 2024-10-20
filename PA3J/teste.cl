@@ -1,7 +1,14 @@
+class HashSymbol {
+           x : Int;  #
+};
+
 class Test {
     testMethod() : Int {
-        (5 + 3;
+                {  
+(5 + 3;
         10;
+   }
+                    
     }
 };
 
@@ -83,8 +90,3 @@ class ReservedWordError {
     }
 };
 
-class HashSymbol {
-    hstest() : Int{
-           x : Int;  #
-    }
-};
