@@ -24,7 +24,7 @@ class IncompleteExpressions {
         5 +- 2;
         2 * ;
         3;
-    }
+    };
 };
 
 class {
@@ -58,13 +58,13 @@ class AssignmentError {
 
 class NewError {
     createObject() : Object {
-        new Object;
+        new;
     }
 };
 
 class SequenceError {
     sequenceTest() : Int {
-        5;
+        5
         10;
     }
 };
@@ -73,20 +73,18 @@ class CaseError {
     caseTest() : Int {
         case x of
         0 : 0;
-        esac;
     }
 };
 
 class LetError {
     letTest() : Int {
-        let x : Int <- 5 in x;
-        let y : Int <- 1 in y + 1;
+        let x : Int in x; 
+        let y in y + 1;  
     }
 };
 
 class ReservedWordError {
     test() : Int {
-        let myClass : Int <- 5 in myClass;
-    }
+        let let : Int <- 5 in let
+    };
 };
-
