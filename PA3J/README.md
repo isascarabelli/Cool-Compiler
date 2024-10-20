@@ -355,13 +355,205 @@ Foram criadas classes apresentando um erro sintático em cada uma para a criaç�
 #### Classe HashSymbol
 O símbolo # não é um caractere válido na linguagem Cool. Usar ele de qualquer forma terá como resultado um erro de sintaxe.
 ```
-	class HashSymbol {
-    x : Int;  #
+class HashSymbol {
+           x : Int;  #
 };
 ```
+Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/c89f79b4-4fe3-4974-9198-e05f79db1e4d)
 
 #### Classe Test
 O objetivo desse erro é mostrar que a falta de um parênteses, causará um erro de sintaxe.
 
+```
+class Test {
+    testMethod() : Int {
+                {  
+(5 + 3;
+        10;
+   }
+                    
+    }
+};
+```
+Resposta do Parser:
+
+![image](https://github.com/user-attachments/assets/7a87579b-f206-4086-bd97-a7aed1d12723)
+
 #### Classe ControlFlow
+Na expressão if, é necessário que na sua estrutura tenha uma bloco else.
+Na expressão while, é necessário a presença do bloco pool para encerrar o loop. 
+
+```
+class ControlFlow {
+    controlTest() : Int {
+        if true then 5;
+        while true loop 10;
+    }
+};
+```
+Resposta do Parser:
+> Erro if:
+![image](https://github.com/user-attachments/assets/9d188535-fecd-4a40-bece-79742ecd72b1)
+
+>Erro while:
+![image](https://github.com/user-attachments/assets/250f93c0-d135-4319-a3fb-79c92d11bd78)
+
+#### Classe IncompleteExpressions
+A expressão "5 +- 2" está incompleta ou incorreta. Caso incompleta, é necessário um valor entre os sinais de positivo e negativo. Caso incorreta, é necessário manter apenas um sinal. 
+Na expressão "2*;" ela está incompleta, e nesse caso, o resto da operação foi deixada na linha abaixo. 
+
+```
+class IncompleteExpressions {
+    incomplete() : Int {
+        5 +- 2;
+        2 * ;
+        3;
+    };
+};
+```
+Resposta do Parser:
+
+![image](https://github.com/user-attachments/assets/2952228d-9ebd-47bb-8e5d-b42d3071280c)
+![image](https://github.com/user-attachments/assets/20a9a46c-f6e2-4bff-8c7f-16ea44a0288c)
+![image](https://github.com/user-attachments/assets/2354f571-7793-4bcd-b663-dba2f333227b)
+
+#### Classe class (sem nome)
+Na linguagem Cool, é necessário que todas as classes tenham um nome. 
+
+```
+class {
+    method() : Int {
+        0;
+    }
+};
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/729926b0-71c8-4c45-b321-e627c157511b)
+
+#### Classe TypeError
+É necessário que o tipo do retorno seja válido e reconhecido. "Stringabc oi" não é aceito. 
+
+```
+class TypeError {
+    test() : Stringabc oi {
+        let x : Stri <- 10 in x;
+    }
+};
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/e7c24a41-459e-4369-ae43-eee2b7768c29)
+
+#### Classe MethodError
+Em missingReturnTypeMethod, não exite uma instrução de retorno. 
+
+```
+class MethodError {
+    badMethod() : Int { 
+        0;
+    }
+
+    missingReturnTypeMethod() : Int {
+        5;
+    }
+};
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/f9fa1b5f-3328-4be8-8e28-8b3b5ece3b05)
+
+#### Classe AssignmentError
+Antes de ser atribuída, a variável y não foi declarada. 
+Em "x <= 5", o operador <= é usado para comparação e não para atribuição, sendo necessário uar <-.
+
+```
+class AssignmentError {
+    assignTest() : Int {
+         y <- 10
+         x <= 5;
+    }
+};
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/75631d90-57e1-434c-bb52-4555056375ea)
+
+
+#### Classe NewError
+O new foi usado de forma incompleta e incorreta, o new é usado para instanciar objetos de uma classe, sendo necessário estar seguido do nome da classe a ser instanciada. Assim, não foi instanciado um objeto da classe Object.
+
+```
+class NewError {
+    createObject() : Object {
+        new;
+    }
+};
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/647d6525-9c5a-442d-a5e6-b50973a7e773)
+
+
+#### Classe SequenceError
+Está faltando um ponto e vírgula após o 5. Na linguagem Cool, é necessário que todas as instruções que pertencem ao mesmo método sejam encerradas com um ponto e vírgula. 
+
+```
+class SequenceError {
+    sequenceTest() : Int {
+        5
+        10;
+    }
+};
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/a8aa17da-b03c-4097-8c68-17a9e3b6ec8f)
+
+#### Classe CaseError
+Está faltando uma variável para o case, sendo necessário que x estivesse declarado previamente, e o bloco case em si não possui um padrão ou um esac para encerramento da construção. 
+
+```
+class CaseError {
+    caseTest() : Int {
+        case x of
+        0 : 0;
+    }
+};
+
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/841f4030-ef5d-4319-84bd-51165aa874a5)
+
+
+#### Classe LetError
+A variável X não é inicializada no bloco let, sendo necessário a atribuição de um valor a ela. 
+Não é especificado o tipo de Y e façta atribuir um valor a essa variável.
+
+```
+class LetError {
+    letTest() : Int {
+        let x : Int in x; 
+        let y in y + 1;  
+    }
+};
+```
+
+Resposta do Parser:
+![image](https://github.com/user-attachments/assets/25956c81-876c-4520-a85c-8b1e78ae49dc)
+
+
+#### Classe ReservedWordError
+Não é permitido que palavras reservadas sejam usadas como identificadores na linguagem Cool. Dessa forma, o "let" não poderia ser usado como um identificador. 
+```
+class ReservedWordError {
+    test() : Int {
+        let let : Int <- 5 in let
+    };
+};
+```
+
+Resposta do Parser:
