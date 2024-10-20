@@ -50,7 +50,7 @@ class Main {
         };
 
         let hs : HashSymbol <- new HashSymbol in {
-            hs.x <- 100;  
+            hs.hstest();  
         };
 
         0;
@@ -143,5 +143,7 @@ class ReservedWordError {
 };
 
 class HashSymbol {
-    x : Int;  #
+    hstest() : Int{
+           x : Int;  #
+    }
 };
