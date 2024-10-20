@@ -27,15 +27,15 @@ class IncompleteExpressions {
     }
 };
 
-class NamedClass {
+class {
     method() : Int {
         0;
     }
 };
 
 class TypeError {
-    test() : Int {
-        let x : String <- 10 in x;
+    test() : Stringabc oi {
+        let x : Stri <- 10 in x;
     }
 };
 
@@ -52,7 +52,7 @@ class MethodError {
 class AssignmentError {
     assignTest() : Int {
          y <- 10;
-         x <- 5;
+         x <= 5;
     }
 };
 
