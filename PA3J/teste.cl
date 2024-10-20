@@ -49,6 +49,10 @@ class Main {
             rw.test();
         };
 
+        let hs : HashSymbol <- new HashSymbol in {
+            hs.x <- 100;  
+        };
+
         0;
     }
 };
@@ -136,4 +140,8 @@ class ReservedWordError {
     test() : Int {
         let myClass : Int <- 5 in myClass;
     }
+};
+
+class HashSymbol {
+    x : Int;  #
 };
