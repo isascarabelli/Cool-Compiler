@@ -350,4 +350,18 @@ Saída da AST:
 ### bad.cl
 Arquivo criado para testar erros sintáticos da linguagem cool. Foram desenvolvidos trechos de código simples, porém contendo erros, com o objetivo de observar como o analisador sintático se comporta diante os erros. 
 
-Foram reutilizados trechos do código good.cl, teste.cl do analisador léxico, e foram criados outros trechos para a criação desse arquivo teste. 
+Foram criadas classes apresentando um erro sintático em cada uma para a criação desse arquivo teste. 
+
+#### Classe HashSymbol
+O símbolo # não é um caractere válido na linguagem Cool. Usar ele de qualquer forma terá como resultado um erro de sintaxe.
+```
+	class HashSymbol {
+    x : Int;  #
+};
+```
+![image](https://github.com/user-attachments/assets/c89f79b4-4fe3-4974-9198-e05f79db1e4d)
+
+#### Classe Test
+O objetivo desse erro é mostrar que a falta de um parênteses, causará um erro de sintaxe.
+
+#### Classe ControlFlow
