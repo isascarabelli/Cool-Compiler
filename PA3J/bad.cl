@@ -66,7 +66,7 @@ class SequenceError {
     sequenceTest() : Int {
         5
         10;
-    }
+    };
 };
 
 class CaseError {
