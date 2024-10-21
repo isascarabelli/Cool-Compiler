@@ -431,6 +431,7 @@ class {
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/729926b0-71c8-4c45-b321-e627c157511b)
 
 #### Classe TypeError
@@ -445,6 +446,7 @@ class TypeError {
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/e7c24a41-459e-4369-ae43-eee2b7768c29)
 
 #### Classe MethodError
@@ -463,6 +465,7 @@ class MethodError {
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/f9fa1b5f-3328-4be8-8e28-8b3b5ece3b05)
 
 #### Classe AssignmentError
@@ -474,11 +477,12 @@ class AssignmentError {
     assignTest() : Int {
          y <- 10
          x <= 5;
-    }
+    };
 };
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/75631d90-57e1-434c-bb52-4555056375ea)
 
 
@@ -494,22 +498,24 @@ class NewError {
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/647d6525-9c5a-442d-a5e6-b50973a7e773)
 
 
 #### Classe SequenceError
-Está faltando um ponto e vírgula após o 5. Na linguagem Cool, é necessário que todas as instruções que pertencem ao mesmo método sejam encerradas com um ponto e vírgula. 
+Presença de dois retornos. 
 
 ```
 class SequenceError {
     sequenceTest() : Int {
         5
         10;
-    }
+    };
 };
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/a8aa17da-b03c-4097-8c68-17a9e3b6ec8f)
 
 #### Classe CaseError
@@ -526,11 +532,11 @@ class CaseError {
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/841f4030-ef5d-4319-84bd-51165aa874a5)
 
 
 #### Classe LetError
-A variável X não é inicializada no bloco let, sendo necessário a atribuição de um valor a ela. 
 Não é especificado o tipo de Y e façta atribuir um valor a essa variável.
 
 ```
@@ -543,6 +549,7 @@ class LetError {
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/25956c81-876c-4520-a85c-8b1e78ae49dc)
 
 
@@ -557,4 +564,5 @@ class ReservedWordError {
 ```
 
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/c0da6156-f86c-43c9-ab23-04d6326cf483)
