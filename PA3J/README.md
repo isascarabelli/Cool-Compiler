@@ -448,7 +448,7 @@ Resposta do Parser:
 ![image](https://github.com/user-attachments/assets/e7c24a41-459e-4369-ae43-eee2b7768c29)
 
 #### Classe MethodError
-Em missingReturnTypeMethod, não exite uma instrução de retorno. 
+Em missingReturnTypeMethod, não é apresentado o tipo. 
 
 ```
 class MethodError {
@@ -456,7 +456,7 @@ class MethodError {
         0;
     }
 
-    missingReturnTypeMethod() : Int {
+    missingReturnTypeMethod() : {
         5;
     }
 };
