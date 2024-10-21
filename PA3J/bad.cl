@@ -44,7 +44,7 @@ class MethodError {
         0;
     }
 
-    missingReturnTypeMethod() : Int {
+    missingReturnTypeMethod() : {
         5;
     }
 };
