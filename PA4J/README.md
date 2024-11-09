@@ -16,6 +16,437 @@ Os códigos alterados pelo grupo se encontram em “cool-tree.java” e “Class
 ## Código
 ### cool-tree.java
 
+### ClassTable.java
+Esta classe é um espaço reservado para alguns métodos, incluindo relatórios de erros e inicialização de classes básica. Usada para armazenar e gerenciar informações semânticas de classes em COOL, a ClassTable controla a hierarquia de herança e tipos básicos, valida identificadores e métodos, e permite verificar relações de subtipos entre classes.
+
+Seu funcionamento básico consiste quando a `ClassTable` é criada, inicializando classes básicas. Para cada classe fornecida, `ClassTable` verifica a herança e registra métodos e atributos, onde durante a compilação, `ClassTable` permite verificações de subtipos, herança, e compatibilidade de tipos, gerando erros quando há inconsistências semânticas.
+
+No começo do arquivo, é declarado os principais atributos da classe. Vamos explorar um pouco sobre eles:
+
+`currentClass` armazena a classe atual, usada em contextos como verificações de tipo SELF_TYPE.
+```
+    private AbstractSymbol currentClass;
+```
+
+`semantErrors` conta erros semânticos, e `errorStream` imprime mensagens de erro.
+```
+    private int semantErrors;
+    private PrintStream errorStream;
+```
+
+`AbstractSymbol` representa os tipos básicos (`Object`, `IO`, `Int`, `Bool`, `String`). Eles são utilizados para criar a hierarquia básica da linguagem, onde cada classe é responsável por manipular o tipo a quem foi descrito.
+`object_class` é a raiz de todas as outras classes no sistema. Todos os objetos em Cool derivam, direta ou indiretamente, dessa classe, e `io_class` que representa a classe IO, que herda de Object e adiciona funcionalidades específicas para entrada e saída.
+```
+    private AbstractSymbol object_class;
+    private AbstractSymbol io_class;
+    private AbstractSymbol int_class;
+    private AbstractSymbol bool_class;
+    private AbstractSymbol string_class;
+```
+
+`classes` é uma lista de classes, enquanto `classMap` mapeia símbolos para classes, facilitando consultas rápidas por nome.
+```
+    private Vector<class_c> classes;
+    private HashMap<AbstractSymbol, class_c> classMap;
+```
+
+`illegalIdentifiers` armazena identificadores que são reservados ou ilegais (como `SELF_TYPE`). Esses identificadores são inicializados a partir de `illegalIdentifierSymbols`.
+```
+    private  Vector<AbstractSymbol> illegalIdentifiers;
+    private static final AbstractSymbol[] illegalIdentifierSymbols = 
+    new AbstractSymbol[] {
+	TreeConstants.self,
+	TreeConstants.SELF_TYPE
+    };
+```
+
+Em seguida, temos o método `installBasicClasses` que define as classes básicas de COOL. Ele cria classes que representam conceitos fundamentais e essas classes são implementadas como árvores de sintaxe (parse trees) simplificadas. Vamos aos detalhes:
+
+- Classe Object:
+
+`Object` é a classe raiz de todas as outras classes e não tem nenhuma classe pai (indicada por `TreeConstants.No_class`). `cool_abort()` interrompe o programa, 
+`type_name()` retorna o nome da classe como uma String e `copy()` retorna uma cópia do objeto usando SELF_TYPE, que representa o tipo do objeto que chama o método.
+
+```
+class_c Object_class = 
+    new class_c(0, 
+	       TreeConstants.Object_, 
+	       TreeConstants.No_class,
+	       new Features(0)
+		   .appendElement(new method(0, 
+		      TreeConstants.cool_abort, 
+		      new Formals(0), 
+		      TreeConstants.Object_, 
+		      new no_expr(0)))
+		   .appendElement(new method(0,
+		      TreeConstants.type_name,
+		      new Formals(0),
+		      TreeConstants.Str,
+		      new no_expr(0)))
+		   .appendElement(new method(0,
+		      TreeConstants.copy,
+		      new Formals(0),
+		      TreeConstants.SELF_TYPE,
+		      new no_expr(0))),
+	       filename);
+```
+
+- Classe IO:
+
+`IO` herda de `Objec`t e fornece métodos para entrada e saída. `out_string(Str)` escreve uma String no console, `out_int(Int)` escreve um Int no console, `in_string()` lê uma String do console e `in_int()` lê um Int do console.
+
+```
+class_c IO_class = 
+    new class_c(0,
+	       TreeConstants.IO,
+	       TreeConstants.Object_,
+	       new Features(0)
+		   .appendElement(new method(0,
+		      TreeConstants.out_string,
+		      new Formals(0)
+			  .appendElement(new formalc(0,
+			     TreeConstants.arg,
+			     TreeConstants.Str)),
+		      TreeConstants.SELF_TYPE,
+		      new no_expr(0)))
+		   .appendElement(new method(0,
+		      TreeConstants.out_int,
+		      new Formals(0)
+			  .appendElement(new formalc(0,
+			     TreeConstants.arg,
+			     TreeConstants.Int)),
+		      TreeConstants.SELF_TYPE,
+		      new no_expr(0)))
+		   .appendElement(new method(0,
+		      TreeConstants.in_string,
+		      new Formals(0),
+		      TreeConstants.Str,
+		      new no_expr(0)))
+		   .appendElement(new method(0,
+		      TreeConstants.in_int,
+		      new Formals(0),
+		      TreeConstants.Int,
+		      new no_expr(0))),
+	       filename);
+```
+
+- Classe Int:
+
+`Int` representa um número inteiro e herda de `Object`. Possui apenas um atributo `val` para armazenar o valor inteiro.
+
+```
+class_c Int_class = 
+    new class_c(0,
+       TreeConstants.Int,
+       TreeConstants.Object_,
+       new Features(0)
+	   .appendElement(new attr(0,
+		    TreeConstants.val,
+		    TreeConstants.prim_slot,
+		    new no_expr(0))),
+       filename);
+```
+- Classe Bool:
+
+`Bool` herda de Object e assim como `Int`, possui um único atributo `val`.
+
+```
+class_c Bool_class = 
+    new class_c(0,
+       TreeConstants.Bool,
+       TreeConstants.Object_,
+       new Features(0)
+	   .appendElement(new attr(0,
+		    TreeConstants.val,
+		    TreeConstants.prim_slot,
+		    new no_expr(0))),
+       filename);
+```
+- Classe Str:
+
+`Str` representa uma `String` e herda de `Object`. `val` denota o comprimento da String, `str_field` O conteúdo da String em si, `length()` retorna o comprimento da String, `concat(Str)` concatena a String com outra e `substr(Int, Int)` extrai uma substring entre dois índices.
+
+```
+class_c Str_class =
+    new class_c(0,
+       TreeConstants.Str,
+       TreeConstants.Object_,
+       new Features(0)
+	   .appendElement(new attr(0,
+		    TreeConstants.val,
+		    TreeConstants.Int,
+		    new no_expr(0)))
+	   .appendElement(new attr(0,
+		    TreeConstants.str_field,
+		    TreeConstants.prim_slot,
+		    new no_expr(0)))
+	   .appendElement(new method(0,
+		      TreeConstants.length,
+		      new Formals(0),
+		      TreeConstants.Int,
+		      new no_expr(0)))
+	   .appendElement(new method(0,
+		      TreeConstants.concat,
+		      new Formals(0)
+			  .appendElement(new formalc(0,
+			     TreeConstants.arg, 
+			     TreeConstants.Str)),
+		      TreeConstants.Str,
+		      new no_expr(0)))
+	   .appendElement(new method(0,
+		      TreeConstants.substr,
+		      new Formals(0)
+			  .appendElement(new formalc(0,
+			     TreeConstants.arg,
+			     TreeConstants.Int))
+			  .appendElement(new formalc(0,
+			     TreeConstants.arg2,
+			     TreeConstants.Int)),
+		      TreeConstants.Str,
+		      new no_expr(0))),
+	       filename);
+```
+
+Após serem criadas, essas classes são adicionadas a uma lista (`classes`) e a um mapa (`classMap`) para que possam ser facilmente acessadas e identificadas durante a execução do programa.
+
+```
+	classes.add(Object_class);
+	classes.add(IO_class);
+	classes.add(Int_class);
+	classes.add(Bool_class);
+	classes.add(Str_class);
+	
+	classMap.put(TreeConstants.Object_, Object_class);
+	classMap.put(TreeConstants.IO,      IO_class);
+	classMap.put(TreeConstants.Int,     Int_class);
+	classMap.put(TreeConstants.Bool,    Bool_class);
+	classMap.put(TreeConstants.Str,     Str_class);
+```
+
+O método `semant` é chamado em cada classe básica, indicando que uma análise semântica básica é realizada para garantir que essas classes fundamentais estão corretamente definidas.
+
+```
+	Object_class.semant(this);
+	IO_class.semant(this);
+	Int_class.semant(this);
+	Bool_class.semant(this);
+	Str_class.semant(this);
+```
+
+Identificadores reservados são adicionados a uma lista (`illegalIdentifiers`) para impedir que o programador os redefina, pois eles fazem parte do núcleo do sistema.
+
+```
+	illegalIdentifiers.add(TreeConstants.Object_);
+	illegalIdentifiers.add(TreeConstants.IO);
+	illegalIdentifiers.add(TreeConstants.Int);
+	illegalIdentifiers.add(TreeConstants.Bool);
+	illegalIdentifiers.add(TreeConstants.Str);
+```
+
+- Construtor ClassTable
+- 
+O construtor recebe uma lista de classes (`Classes cls`), configura a hierarquia básica e realiza verificações iniciais.
+
+`installBasicClasses` chama métodos para instalar as classes básicas, adicionando-as à lista `classes` e mapeando-as em `classMap`, e para cada classe verifica se há ciclos na hierarquia de herança, lançando um erro semântico em caso de ciclos. Abaixo está o código:
+
+```
+    public ClassTable(Classes cls) {
+	semantErrors = 0;
+	errorStream = System.err;
+       
+	classes = new Vector();
+	classMap = new HashMap<AbstractSymbol, class_c>();
+
+	// Create all basic classes
+	installBasicClasses();
+
+	// Iterate through Classes list and log all
+	// classes in class table
+	for(Enumeration<class_c> e=cls.getElements(); 
+	    e.hasMoreElements();) {
+
+	    class_c c = e.nextElement();
+	    classes.add(c);
+	    Object o = classMap.put(c.getName(), c);
+
+	    if(o != null) {
+		semantError(c.getFilename(), c)
+		    .println("Class " + c.getName().getString() + 
+			     " was previously defined.");
+	    }
+	}
+
+
+	for(Enumeration<class_c> e=cls.getElements();
+	    e.hasMoreElements();) {
+	    class_c c = e.nextElement();
+	    checkInheritance(c.getName());
+	}
+
+
+	if(errors()) {
+	    System.err.println("Compilation halted due to static semantic errors.");
+	    System.exit(1);
+	}
+    }
+```
+`checkInheritance` verifica se uma classe herda de um tipo proibido ou se há ciclos de herança. `semantError` registra e imprime erros semânticos, incrementando semantErrors. `errors` verifica se ocorreram erros durante a análise.
+```
+public void checkInheritance(AbstractSymbol a, Vector<AbstractSymbol> v, AbstractSymbol superClass) {
+	class_c c = getClass_c(a);
+	if(a.equals(TreeConstants.No_class)) {
+	    // At the top of heirarchy
+	    return;
+	} else if(a.equals(TreeConstants.Int) ||
+		  a.equals(TreeConstants.Bool) ||
+		  a.equals(TreeConstants.Str) ||
+		  a.equals(TreeConstants.self) ||
+		  a.equals(TreeConstants.SELF_TYPE)) {
+	    // Object inherits from illegal type
+	    class_c parent = getClass_c(superClass);
+	    semantError(parent.getFilename(), parent)
+		.println("Illegal inheritance from fundamental type: "
+			 + superClass.getString()
+			 + " inherits "
+			 + a.getString());
+	    
+	} else if(v.contains(a)) {
+	    // An illegal heirarchy has been found
+	    semantError(c.getFilename(), c)
+		.println("Illegal cyclic inheritance at " + c);
+	} else if(c == null) {
+	    
+	    class_c s = getClass_c(superClass);
+	    semantError(s.getFilename(), s)
+		.println("");
+
+	} else {
+	    // Continue checking heirarchy
+	    v.add(a);
+	    checkInheritance(c.getParent(), v, superClass);
+	}
+    }
+
+public PrintStream semantError(class_c c) {
+	return semantError(c.getFilename(), c);
+    }
+
+public PrintStream semantError(AbstractSymbol filename, TreeNode t) {
+	errorStream.print(filename + ":" + t.getLineNumber() + ": ");
+	return semantError();
+    }
+
+public PrintStream semantError() {
+	semantErrors++;
+	return errorStream;
+    }
+
+public boolean errors() {
+	return semantErrors != 0;
+    }
+```
+
+Para os métodos de Manipulação de Hierarquia, temos `getClass_c` e `getParent`, onde `getClass_c` retorna uma classe pelo nome, e `getParent` obtém o símbolo do pai de uma classe. `isSubtypeOf` verifica se uma classe é subtipo de outra, levando em conta tipos especiais como No_type e SELF_TYPE. `lub` encontra o menor supertipo comum entre duas classes na hierarquia de herança, importante para verificar compatibilidade entre tipos.
+
+```
+public class_c getClass_c(AbstractSymbol name) {
+	return classMap.get(name);
+    }
+
+public AbstractSymbol getParent(AbstractSymbol a) {
+	return getClass_c(a).getParent();
+    }
+
+public class_c getParentClass(AbstractSymbol a) {
+	return getParentClass(getClass_c(a));
+    }
+
+public class_c getParentClass(class_c c) {
+	return getClass_c(c.getParent());
+    }
+
+public boolean isSubtypeOf(AbstractSymbol c1, AbstractSymbol c2) {
+	if(DEBUG) {
+	    System.out.println(c1.getString() + ", " + 
+			       c2.getString());
+	}
+
+public AbstractSymbol lub(AbstractSymbol a1, AbstractSymbol a2) {
+
+	if(isSelfType(a1)) {
+	    return lub(getCurrentClass(), a2);
+	} else if(isSelfType(a2)) {
+	    return lub(a1, getCurrentClass());
+	} if(isSupertypeOf(a1, a2)) {
+	    return a1;
+	} else {
+	    return lub(getClass_c(a1).getParent(),
+		       a2);
+	}
+    }
+
+public AbstractSymbol lub(class_c c1, class_c c2) {
+	return lub(c1.getName(), c2.getName());
+    }
+```
+Aqui `getFeature` busca um método ou atributo em uma classe e suas superclasses, `validComparisonTypes` verifica se dois objetos possuem tipos compatíveis para operações de comparação, como Int com Int, Bool com Bool, etc. `isSelfType` determina se um símbolo representa SELF_TYPE. `setCurrentClass` e `getCurrentClass` são métodos para definir e recuperar a classe atual (importante para contexto de verificação de SELF_TYPE).
+
+```
+public Feature getFeature(AbstractSymbol className, AbstractSymbol featureName) {
+	if(className.equals(TreeConstants.No_class)) {
+	    return null;
+	} else if(isSelfType(className)) {
+	    return getFeature(getCurrentClass(), 
+			      featureName);
+	} else {
+	    class_c c = getClass_c(className);
+	    Feature feature = c.getFeature(featureName);
+
+	    if(feature == null) {
+		return getFeature(c.getParent(), featureName);
+	    } else {
+		return feature;
+	    }
+	}
+    }
+
+public boolean validComparisonTypes(Expression e1, Expression e2) {
+	if(e1.get_type().equals(TreeConstants.Int) ||
+	   e2.get_type().equals(TreeConstants.Int)) {
+
+	    return e1.get_type().equals(TreeConstants.Int) && 
+		e2.get_type().equals(TreeConstants.Int);
+
+	} else if(e1.get_type().equals(TreeConstants.Bool) ||
+	   e2.get_type().equals(TreeConstants.Bool)) {
+
+	    return e1.get_type().equals(TreeConstants.Bool) && 
+		e2.get_type().equals(TreeConstants.Bool);
+
+	} else if(e1.get_type().equals(TreeConstants.Str) ||
+	   e2.get_type().equals(TreeConstants.Str)) {
+
+	    return e1.get_type().equals(TreeConstants.Str) && 
+		e2.get_type().equals(TreeConstants.Str);
+
+	} else {
+	    return true;
+	}
+    }
+
+public boolean isSelfType(AbstractSymbol symbol) {
+	return TreeConstants.self.equals(symbol) ||
+	    TreeConstants.SELF_TYPE.equals(symbol);
+    }
+
+public void setCurrentClass(AbstractSymbol symbol) {
+	this.currentClass = symbol;
+    }
+
+public AbstractSymbol getCurrentClass() {
+	return this.currentClass;
+    }
+```
 ## Testes
 
 
