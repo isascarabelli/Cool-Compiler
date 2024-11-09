@@ -106,10 +106,10 @@ Realizamos a chamada desses métodos na Main, com o código a seguir:
 
 ```
 let a:A <- new B in { 
-			a.init();
-			out_int(a.getx().foo());
-		};
-		out_string("\n");
+	a.init();
+	out_int(a.getx().foo());
+};
+out_string("\n");
 ```
 Para esse trecho, obtivemos a seguinte AST.
 ```
@@ -186,8 +186,8 @@ Para o tipo String, realizamos um teste baseado no método de concatenação. In
 
 ```
 out_int(s.length());
-		out_string("\n".concat(s.concat(" string\n")));
-		out_string(s.substr(5, 2).concat("\n"));
+out_string("\n".concat(s.concat(" string\n")));
+out_string(s.substr(5, 2).concat("\n"));
 ```
 Que devolveu como saída a AST descrita:
 
@@ -292,4 +292,693 @@ Podemos ver aqui uma sucessão de ocorrências de
 ```
 que demonstra que a variável `s` corretamente foi avaliada como tipo `String`.
 
+- Int
+Ao realizarmos os testes para o tipo Int usamos dois tipos de testes. Uma função recursiva de calculo de potências e uma expressão matemática com precedência por parêntesis.
+
+A função `exp` foi a que usamos para os testes:
+```
+exp(b : Int, x : Int) : Int {
+	if (x = 0)
+	then
+	1
+	else
+	if (x = (2 * (x / 2)))
+	then
+		let y : Int <- exp(b, (x / 2)) in
+		y * y
+	else
+		b * exp(b, x - 1)
+	fi
+	fi
+};
+```
+E para testá-la, chamamos diversas potências:
+```
+out_int(exp(2, 7));
+out_string("\n");
+out_int(exp(3, 6));
+out_string("\n");
+out_int(exp(8, 3));
+out_string("\n");
+```
+Que devolveram a AST abaixo. Nela podemos observar que, seguido de numerais como 2, 7, entre outros, vemos o trecho `: Int`, que denota o tipo daquele dado literal, no nosso caso, inteiros.
+```
+#44
+_dispatch
+          #44
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #44
+          _dispatch
+            #44
+            _object
+              self
+            : SELF_TYPE
+            exp
+            (
+            #44
+            _int
+              2
+            : Int
+            #44
+            _int
+              7
+            : Int
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #45
+        _dispatch
+          #45
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #45
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #46
+        _dispatch
+          #46
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #46
+          _dispatch
+            #46
+            _object
+              self
+            : SELF_TYPE
+            exp
+            (
+            #46
+            _int
+              3
+            : Int
+            #46
+            _int
+              6
+            : Int
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #47
+        _dispatch
+          #47
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #47
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #48
+        _dispatch
+          #48
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #48
+          _dispatch
+            #48
+            _object
+              self
+            : SELF_TYPE
+            exp
+            (
+            #48
+            _int
+              8
+            : Int
+            #48
+            _int
+              3
+            : Int
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #49
+        _dispatch
+          #49
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #49
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+```
+Para a análise da expressão dada pelo código:
+```
+let x:Int <- 5 in {
+	out_int((x <- 1) + ((x <- x+1) 
+			+ (3 + (4 + (5 + (6 + (7+ (x+6))))))));
+};
+```
+Obtivemos a AST abaixo:
+```
+        #52
+        _let
+          x
+          Int
+          #52
+          _int
+            5
+          : Int
+          #52
+          _block
+            #53
+            _dispatch
+              #53
+              _object
+                self
+              : SELF_TYPE
+              out_int
+              (
+              #53
+              _plus
+                #53
+                _assign
+                  x
+                  #53
+                  _int
+                    1
+                  : Int
+                : Int
+                #54
+                _plus
+                  #53
+                  _assign
+                    x
+                    #53
+                    _plus
+                      #53
+                      _object
+                        x
+                      : Int
+                      #53
+                      _int
+                        1
+                      : Int
+                    : Int
+                  : Int
+                  #54
+                  _plus
+                    #54
+                    _int
+                      3
+                    : Int
+                    #54
+                    _plus
+                      #54
+                      _int
+                        4
+                      : Int
+                      #54
+                      _plus
+                        #54
+                        _int
+                          5
+                        : Int
+                        #54
+                        _plus
+                          #54
+                          _int
+                            6
+                          : Int
+                          #54
+                          _plus
+                            #54
+                            _int
+                              7
+                            : Int
+                            #54
+                            _plus
+                              #54
+                              _object
+                                x
+                              : Int
+                              #54
+                              _int
+                                6
+                              : Int
+                            : Int
+                          : Int
+                        : Int
+                      : Int
+                    : Int
+                  : Int
+                : Int
+              : Int
+              )
+            : SELF_TYPE
+          : SELF_TYPE
+        : SELF_TYPE
+```
+Aqui temos uma saída interessante, com diversos `: Int`. Isso ocorreu por conta das precedências dadas pelos parêntesis, onde a cada fechamento o tipo era indicado e, como a expressão opera com inteiros, o tipo Int é indicado. No final também temos indicações de tipos `SELF_TYPE` que decorrem do `let`.
+
+- Bool
+
+Aqui utilizamos uma estratégia diferente. Utilizamos o método `type_name()` que retorna uma String com o tipo da variável usada no dispatch. A cada chamada de `t.type_name()`, onde x é a variável que o tipo será analisado, ele realiza um processo de verificação do tipo de x. Veja abaixo o exemplo dessa chamada:
+```
+ #70
+_dispatch
+	#70
+	_object
+	t		
+	: Bool
+	type_name
+	(
+	)
+: String
+)
+```
+O tipo de `t` é indicado como `Bool` e na sequência a indicação de `type_name()` como `String`. Tudo isso ocorre sucessivas vezes no teste que realizamos, para que fosse possível analisar a corretude do analisador semântico. O código usado e a AST estão respectivamente listados abaixo:
+```
+let
+	t:Bool <- true,
+	f:Bool <- false,
+	t1:Object <- t,
+	t2:Object <- true,
+	f1:Object <- f,
+	f2:Object <- false,
+	b1:Bool,
+	b2:Object,
+	io:IO <- new IO
+in {
+	io.out_string("t: ");
+	io.out_string(t.type_name());
+	io.out_string("\n");
+
+	b1 <- t;
+	io.out_string("b1: ");
+	io.out_string(b1.type_name());
+	io.out_string("\n");
+
+	b2 <- t1;
+	io.out_string("b2: ");
+	io.out_string(b2.type_name());
+	io.out_string("\n");
+
+	b1 <- f.copy();
+	io.out_string("b1: ");
+	io.out_string(b1.type_name());
+	io.out_string("\n");
+
+	b2 <- f2.copy();
+	io.out_string("b2: ");
+	io.out_string(b2.type_name());
+	io.out_string("\n");
+};
+```
+```
+ #59
+        _let
+          t
+          Bool
+          #59
+          _bool
+            1
+          : Bool
+          #60
+          _let
+            f
+            Bool
+            #60
+            _bool
+              0
+            : Bool
+            #61
+            _let
+              t1
+              Object
+              #61
+              _object
+                t
+              : Bool
+              #62
+              _let
+                t2
+                Object
+                #62
+                _bool
+                  1
+                : Bool
+                #63
+                _let
+                  f1
+                  Object
+                  #63
+                  _object
+                    f
+                  : Bool
+                  #64
+                  _let
+                    f2
+                    Object
+                    #64
+                    _bool
+                      0
+                    : Bool
+                    #65
+                    _let
+                      b1
+                      Bool
+                      #0
+                      _no_expr
+                      : _no_type
+                      #66
+                      _let
+                        b2
+                        Object
+                        #0
+                        _no_expr
+                        : _no_type
+                        #67
+                        _let
+                          io
+                          IO
+                          #67
+                          _new
+                            IO
+                          : IO
+                          #68
+                          _block
+                            #69
+                            _dispatch
+                              #69
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #69
+                              _string
+                                "t: "
+                              : String
+                              )
+                            : IO
+                            #70
+                            _dispatch
+                              #70
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #70
+                              _dispatch
+                                #70
+                                _object
+                                  t
+                                : Bool
+                                type_name
+                                (
+                                )
+                              : String
+                              )
+                            : IO
+                            #71
+                            _dispatch
+                              #71
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #71
+                              _string
+                                "\n"
+                              : String
+                              )
+                            : IO
+                            #73
+                            _assign
+                              b1
+                              #73
+                              _object
+                                t
+                              : Bool
+                            : Bool
+                            #74
+                            _dispatch
+                              #74
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #74
+                              _string
+                                "b1: "
+                              : String
+                              )
+                            : IO
+                            #75
+                            _dispatch
+                              #75
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #75
+                              _dispatch
+                                #75
+                                _object
+                                  b1
+                                : Bool
+                                type_name
+                                (
+                                )
+                              : String
+                              )
+                            : IO
+                            #76
+                            _dispatch
+                              #76
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #76
+                              _string
+                                "\n"
+                              : String
+                              )
+                            : IO
+                            #78
+                            _assign
+                              b2
+                              #78
+                              _object
+                                t1
+                              : Object
+                            : Object
+                            #79
+                            _dispatch
+                              #79
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #79
+                              _string
+                                "b2: "
+                              : String
+                              )
+                            : IO
+                            #80
+                            _dispatch
+                              #80
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #80
+                              _dispatch
+                                #80
+                                _object
+                                  b2
+                                : Object
+                                type_name
+                                (
+                                )
+                              : String
+                              )
+                            : IO
+                            #81
+                            _dispatch
+                              #81
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #81
+                              _string
+                                "\n"
+                              : String
+                              )
+                            : IO
+                            #83
+                            _assign
+                              b1
+                              #83
+                              _dispatch
+                                #83
+                                _object
+                                  f
+                                : Bool
+                                copy
+                                (
+                                )
+                              : Bool
+                            : Bool
+                            #84
+                            _dispatch
+                              #84
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #84
+                              _string
+                                "b1: "
+                              : String
+                              )
+                            : IO
+                            #85
+                            _dispatch
+                              #85
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #85
+                              _dispatch
+                                #85
+                                _object
+                                  b1
+                                : Bool
+                                type_name
+                                (
+                                )
+                              : String
+                              )
+                            : IO
+                            #86
+                            _dispatch
+                              #86
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #86
+                              _string
+                                "\n"
+                              : String
+                              )
+                            : IO
+                            #88
+                            _assign
+                              b2
+                              #88
+                              _dispatch
+                                #88
+                                _object
+                                  f2
+                                : Object
+                                copy
+                                (
+                                )
+                              : Object
+                            : Object
+                            #89
+                            _dispatch
+                              #89
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #89
+                              _string
+                                "b2: "
+                              : String
+                              )
+                            : IO
+                            #90
+                            _dispatch
+                              #90
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #90
+                              _dispatch
+                                #90
+                                _object
+                                  b2
+                                : Object
+                                type_name
+                                (
+                                )
+                              : String
+                              )
+                            : IO
+                            #91
+                            _dispatch
+                              #91
+                              _object
+                                io
+                              : IO
+                              out_string
+                              (
+                              #91
+                              _string
+                                "\n"
+                              : String
+                              )
+                            : IO
+                          : IO
+                        : IO
+                      : IO
+                    : IO
+                  : IO
+                : IO
+              : IO
+            : IO
+          : IO
+        : IO
+```
 ### bad.cl
