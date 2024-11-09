@@ -7,10 +7,14 @@
 3. [Testes](#testes)
 
 ## Descrição do Projeto
+Este projeto é um analisador semântico desenvolvido como parte do TP4 de Compiladores. Essa é a terceira fase da compilação, onde se verificam os erros de semântica no código fonte e se faz a coleta das informações necessárias para a próxima fase da compilação, a geração de código. O objetivo da análise semântica é trabalhar no nível de inter-relacionamento entre partes distintas do programa. 
 
+A implementação feita pelo grupo percorre a árvore, gerencia as informações que recolhe da árvore e usa essas informações para apontar os erros ou validar a semântica da linguagem Cool. Essa etapa recebe uma árvore sintática abstrata construída pelo parser para verificação, e irá gerar uma árvore sintática abstrata (ASTs), da mesma forma que a etapa anterior de análise sintática, porém, dessa vez amarrando os tipos de cada expressão, para que seja utilizada pelo gerador de código.
+
+Os códigos alterados pelo grupo se encontram em “cool-tree.java” e “ClassTable.java”. Iremos explicar a seguir as alterações feitas em cada arquivo.
 
 ## Código
-
+### cool-tree.java
 
 ## Testes
 
