@@ -244,7 +244,7 @@ Identificadores reservados são adicionados a uma lista (`illegalIdentifiers`) p
 ```
 
 - Construtor ClassTable
-- 
+
 O construtor recebe uma lista de classes (`Classes cls`), configura a hierarquia básica e realiza verificações iniciais.
 
 `installBasicClasses` chama métodos para instalar as classes básicas, adicionando-as à lista `classes` e mapeando-as em `classMap`, e para cada classe verifica se há ciclos na hierarquia de herança, lançando um erro semântico em caso de ciclos. Abaixo está o código:
