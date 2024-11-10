@@ -1431,6 +1431,7 @@ class TypeMismatch {
 };
 ```
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/d5037e07-5fd6-41f6-b6c0-cbf939770bad)
 
 #### Classe CyclicInheritance
@@ -1441,6 +1442,7 @@ O objetivo dessa classe é mostrar o erro de herança cíclica. Nesse caso, a cl
 class CyclicInheritance inherits CyclicInheritance {};
 ```
 Resposta do Parser:
+
 ![image](https://github.com/user-attachments/assets/dc13c00b-df95-4f7c-b292-0983f50622e9)
 
 
