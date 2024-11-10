@@ -1417,3 +1417,108 @@ in {
         : IO
 ```
 ### bad.cl
+Arquivo criado para testar erros semânticos da linguagem cool. Foram desenvolvidos trechos de código simples, porém contendo erros, com o objetivo de observar como o analisador semântico se comporta diante os erros.
+
+Foram criadas 10 classes apresentando um erro semântico em cada uma, para a criação do arquivo teste bad.cl.
+
+#### Classe TypeMismatch
+  
+Nessa classe, o objetivo é trabalhar com o erro de atribuição de tipos. No exemplo abaixo, a variável 'x' foi declarada como Int, mas esta sendo atribuída a uma String. 
+
+```
+class TypeMismatch {
+    x : Int <- "Isso é uma String";
+};
+```
+Resposta do Parser:
+
+#### Classe UndeclaredVariable
+Aqui, foi feito uma "soma" entre a variável 'x' e o inteiro 20, porém a variável 'x' não foi declarada, tornando-se um erro. Em geral, é necessário que todas as variáveis a serem usada, devem ser declaradas antes de serem utilizadas. 
+
+```
+class UndeclaredVariable {
+    result <- x + 20;
+};
+```
+Resposta do Parser:
+
+#### Classe UndefinedMethod
+
+O erro se encontra na expressão '"Compiladores".lengthValue()'. Ela tenta ter aceso ao método lengthValue() na string "Compiladores", porém esse método não é encontrado no tipo String. 
+
+```
+class UndefinedMethod {
+    x <- "Compiladores".lengthValue();
+};
+```
+Resposta do Parser:
+
+#### Classe CyclicInheritance
+
+O objetivo dessa classe é mostrar o erro de herança cíclica. Nesse caso, a classe CyclicInheritance tenta herdar a si mesma, criando ciclos infinitos. Esse tipo de erro causam erros na compilação e impede uma definição correta da hierarquia. 
+
+```
+class CyclicInheritance inherits CyclicInheritance {};
+```
+Resposta do Parser:
+
+#### Classe UndefinedClassUsage
+
+Nesse erro, existe uma tentativa da classe "ClassCompiladores" instanciar o objeto 'xObj'. Porém, a classe "ClassCompiladores" não foi definida anteriormente no código, sendo necessária a definição para que pudesse instanciar o objeto. 
+```
+class UndefinedClassUsage {
+    xObj : ClassCompiladores <- new ClassCompiladores();
+};
+```
+Resposta do Parser:
+
+#### Métodos incompatíveis após herança de classe
+##### Classe Market e MarketSector
+
+Nesse caso, a classe MarketSector herda da classe Market e redefine o método foodCode. Em Market, o método foodCode recebe um parâmetro do tipo Int e retorna um Int. Porém, quando o método é redefinido na classe MarketSector, ele recebe uma String e retorna uma String. 
+O erro se faz presente após a redefinição, pois viola a coerência dos métodos de uma hierarquia de classe, sendo necessário e correto, que a nova implementação mantenha os mesmos parâmetros e tipo de retorno do método original. 
+
+```
+class Market {
+    foodCode(x : Int) : Int { x + 1 };
+};
+
+class MarketSector inherits Market {
+    foodCode(x : String) : String { "secao de verduras"};
+};
+```
+Resposta do Parser:
+
+#### Classe PrimitiveInheritance
+
+Nesse caso, o erro está associado a tentativa de herdar diretamente um tipo primitivo. Os tipos primitivos não são projetados para serem herdados.  
+
+```
+class PrimitiveInheritance inherits String {};
+```
+Resposta do Parser:
+
+#### Classe UninitializedVariable
+
+Nesse exemplo, a varíavel 'value' deveria ser inicializada antes de ser usada na expressão "sum <- value + 5". O valor de uma variável não inicializada é indefinido, logo gera erro.  
+
+```
+class UninitializedVariable {
+    value : Int;
+    sum <- value + 5;
+};
+```
+Resposta do Parser:
+
+#### Classe InconsistentConditional
+
+Os dois blocos de uma expressão condicional, no caso 'then' e else', devem retornar calores do mesmo tipo para que o compilador possa inferir o tipo da expressão condicional em um todo. 
+Nesse exemplo, o bloco 'then' retorna um Int e o bloco 'else' retorna uma String. Os dois são tipos inconsistentes, ocorre um erro de tipo. 
+
+```
+class InconsistentConditional {
+    conditionResult : String <- if true then 1 else "False";
+};
+```
+Resposta do Parser:
+
