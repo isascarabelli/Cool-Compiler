@@ -1474,6 +1474,62 @@ class PrimitiveInheritance inherits String {};
 Resposta do Parser:
 ![image](https://github.com/user-attachments/assets/78d5247d-3c23-4af0-a1f3-f51156197e70)
 
+#### Classe Main inherits UndefinedClass
+Em Cool, as classes podem herdar outras, porém as outras classes a serem herdadas precisam estar declaradas para que a herança seja válida. 
+A classe "Main" tenta herdar a classe "UndefinedClass" que não existe no código bad.cl, e o compilador não consegue associar a relação de herança, logo o erro é aplicado.
 
+```
+class Main inherits UndefinedClass {  
+    main(): Int { 0 };
+};
+```
+Resposta do Parser:
 
+![image](https://github.com/user-attachments/assets/2f55fc6d-af1f-4319-9755-1e503206b4c3)
 
+#### Classe DuplicateClasses
+Para que não dê ambiguidade nas classes, é necessário que cada classe tenha um nome único dentro do programa. Quand existem duas classes com o mesmo nome, o compilador não difere as duas e gera um erro. 
+
+No exemplo, a classe "DuplicateClasses" é definida duas vezes, criando um erro.
+
+```
+class DuplicateClasses {
+    foo(): Int { 0 };
+};
+
+class DuplicateClasses {  
+    bar(): Int { 1 };
+};
+
+```
+Resposta do Parser:
+
+![image](https://github.com/user-attachments/assets/8665334a-9d2f-4706-8930-9e8ed4291586)
+
+#### Classe DuplicateMethods
+Dentro de uma classe, os métodos precisam ter um nome único. Caso um método tenha o mesmo nome que outro, gera ambiguidade em relação a qual implementação dentro da classe será usada.
+
+O método foo() é declarado mais de uma vez em uma mesma classe, logo o compilador gera erro pois não sabe qual método deve usar.
+
+```
+class DuplicateMethods {
+    foo(): Int { 0 };
+    foo(): Int { 1 };  
+};
+```
+Resposta do Parser:
+
+![image](https://github.com/user-attachments/assets/cc29e47f-f297-4668-8352-fee56fec0c35)
+
+#### Classe Main inherits UndefinedClass
+Na linguagem Cool, existem identificadores reservados que possuem funções específicas na linguagem e não devem ser usados de outras formas, como por exemplo nome de variável. 
+Nessa classe, 'self' está sendo usado como uma variável, porém 'self' é um identificador especial que se refere à instância atual do objeto.
+
+```
+class ReservedIdentifiers {
+    self: Int <- 0;  
+};
+```
+Resposta do Parser:
+
+![image](https://github.com/user-attachments/assets/d38eac9d-ba78-4f42-8c5b-844bd8364137)
