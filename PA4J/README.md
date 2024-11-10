@@ -1431,27 +1431,7 @@ class TypeMismatch {
 };
 ```
 Resposta do Parser:
-
-#### Classe UndeclaredVariable
-Aqui, foi feito uma "soma" entre a variável 'x' e o inteiro 20, porém a variável 'x' não foi declarada, tornando-se um erro. Em geral, é necessário que todas as variáveis a serem usada, devem ser declaradas antes de serem utilizadas. 
-
-```
-class UndeclaredVariable {
-    result <- x + 20;
-};
-```
-Resposta do Parser:
-
-#### Classe UndefinedMethod
-
-O erro se encontra na expressão '"Compiladores".lengthValue()'. Ela tenta ter aceso ao método lengthValue() na string "Compiladores", porém esse método não é encontrado no tipo String. 
-
-```
-class UndefinedMethod {
-    x <- "Compiladores".lengthValue();
-};
-```
-Resposta do Parser:
+![image](https://github.com/user-attachments/assets/d5037e07-5fd6-41f6-b6c0-cbf939770bad)
 
 #### Classe CyclicInheritance
 
@@ -1461,16 +1441,8 @@ O objetivo dessa classe é mostrar o erro de herança cíclica. Nesse caso, a cl
 class CyclicInheritance inherits CyclicInheritance {};
 ```
 Resposta do Parser:
+![image](https://github.com/user-attachments/assets/dc13c00b-df95-4f7c-b292-0983f50622e9)
 
-#### Classe UndefinedClassUsage
-
-Nesse erro, existe uma tentativa da classe "ClassCompiladores" instanciar o objeto 'xObj'. Porém, a classe "ClassCompiladores" não foi definida anteriormente no código, sendo necessária a definição para que pudesse instanciar o objeto. 
-```
-class UndefinedClassUsage {
-    xObj : ClassCompiladores <- new ClassCompiladores();
-};
-```
-Resposta do Parser:
 
 #### Métodos incompatíveis após herança de classe
 ##### Classe Market e MarketSector
@@ -1488,6 +1460,7 @@ class MarketSector inherits Market {
 };
 ```
 Resposta do Parser:
+![image](https://github.com/user-attachments/assets/f1d8ecfe-44e7-4f03-a866-c126622f92e9)
 
 #### Classe PrimitiveInheritance
 
@@ -1497,28 +1470,8 @@ Nesse caso, o erro está associado a tentativa de herdar diretamente um tipo pri
 class PrimitiveInheritance inherits String {};
 ```
 Resposta do Parser:
+![image](https://github.com/user-attachments/assets/78d5247d-3c23-4af0-a1f3-f51156197e70)
 
-#### Classe UninitializedVariable
 
-Nesse exemplo, a varíavel 'value' deveria ser inicializada antes de ser usada na expressão "sum <- value + 5". O valor de uma variável não inicializada é indefinido, logo gera erro.  
 
-```
-class UninitializedVariable {
-    value : Int;
-    sum <- value + 5;
-};
-```
-Resposta do Parser:
-
-#### Classe InconsistentConditional
-
-Os dois blocos de uma expressão condicional, no caso 'then' e else', devem retornar calores do mesmo tipo para que o compilador possa inferir o tipo da expressão condicional em um todo. 
-Nesse exemplo, o bloco 'then' retorna um Int e o bloco 'else' retorna uma String. Os dois são tipos inconsistentes, ocorre um erro de tipo. 
-
-```
-class InconsistentConditional {
-    conditionResult : String <- if true then 1 else "False";
-};
-```
-Resposta do Parser:
 
