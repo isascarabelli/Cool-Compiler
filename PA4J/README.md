@@ -15,6 +15,187 @@ Os códigos alterados pelo grupo se encontram em “cool-tree.java” e “Class
 
 ## Código
 ### cool-tree.java
+#### Estruturas Principais
+Program: Classe abstrata que define o tipo básico para um programa. Toda AST de um programa começa aqui. Ele possui o método semant, que é o ponto de entrada para a verificação semântica.
+
+Class_: Define um tipo básico para classes dentro do programa. É uma abstração de cada classe no programa que será verificada. 
+
+Classes: Representa uma lista de objetos do tipo Class_. Esta classe herda de ListNode, que armazena elementos em um vetor e fornece métodos para manipulação da lista, como appendElement.
+
+Feature: Representa uma característica ou membro de uma classe, que pode ser um atributo ou um método.
+
+Features: Uma lista de Feature, assim como Classes, é uma lista que herda de ListNode e armazena objetos de Feature.
+
+Formal e Formals: Formal representa um argumento formal em um método, enquanto Formals é uma lista de Formal.
+
+Expression e Expressions: Expression é uma classe abstrata para expressões no programa, que armazena um tipo associado à expressão. Expressions é uma lista de Expression.
+
+Case e Cases: Case representa um caso em uma estrutura condicional ou de correspondência de padrões. Cases é uma lista de Case.
+
+A partir dessas classes foram criadas outras classes que herdam de alguma dessas. Cada uma dessas classes que herdam de outra, representam o construtor da AST daquele expressão. Cada uma delas possui implementado o que aqui chamamos de funções auxiliares e mais algumas funções específicas. Como são muitas funções e são muitos tipos de expressões e definições, decidimos explicar apenas alguns aqui no README. O restante possui breves comentários no próprio código. 
+
+Tipos Auxiliares
+SymbolTable: Tabela de símbolos para objetos, que armazena variáveis e seus tipos.
+SymbolTable: Tabela de símbolos para métodos, que armazena métodos e seus tipos de retorno.
+ClassTable: Tabela de classes, que armazena as definições de classes e suas hierarquias.
+class_c: Representa a classe atual que está sendo verificada.
+
+Funções Auxiliares
+dump e dump_with_types: Funções de depuração que imprimem a estrutura e os tipos da árvore, ajudando a verificar a construção e o estado da AST durante a análise. dump_line e dump_AbstractSymbol são usadas para imprimir atributos com recuos para representar a hierarquia da árvore.
+semant: faz a verificação semântica criando uma ClassTable (uma tabela de classes), onde são armazenadas as definições de classe para análise. Se houver erros, a compilação é interrompida.
+getElementClass: retorna o objeto.
+construtores: para criar um objeto vazio e outra para criar um objeto já com seus elementos.
+appendElement: adiciona elementos às listas de cada classe.
+copy: retorna uma cópia daquele objeto.
+
+Outras funções implementadas são específicas de cada classe, para lidar com cada elemento da linguagem. As principais delas serão mencionadas abaixo no próximo tópico, junto com algumas das classes implementadas.
+
+Algumas Funções e Classes Interessantes
+Na classe Formals, a função `compareArgs`, testamos se todos os parâmetros daquela função foram passados, se não, retorna quantos parâmetros foram recebidos e quantos eram esperados.
+
+```
+ public void compareArgs(Expressions expressions,
+                ClassTable classTable,
+                class_c c) {
+    if(expressions.getLength() != getLength()) {
+        classTable.semantError(c.getFilename(), c)
+        .println("Wrong number of arguments passed to function: "
+             + " Expected " + getLength() + ", got "
+             + expressions.getLength());
+        return;
+    }
+```
+Na classe Expressions, a função `dump_type`, retorna o tipo daquele expressão e se for nulo retorna `no_type`:
+
+```
+public void dump_type(PrintStream out, int n) {
+        if (type != null)
+            { out.println(Utilities.pad(n) + ": " + type.getString()); }
+        else
+            { out.println(Utilities.pad(n) + ": _no_type"); }
+    }
+```
+
+Na classe `Cases`, a função `checkTypes` verifica a exclusividade de tipos em ramos de uma expressão case, prevenindo que o mesmo tipo apareça mais de uma vez, o que seria incorreto na análise semântica de uma linguagem como COOL. Caso não seja um tipo duplicado, adiciona no vetor v (contém todos os tipos daquele case):
+
+```
+ public void checkTypes(SymbolTable objectTable,
+               SymbolTable methodTable,
+               ClassTable classTable,
+               class_c c) {
+    Vector<AbstractSymbol> v = new Vector<AbstractSymbol>();
+
+
+    for(Enumeration<Case> e=getElements();
+        e.hasMoreElements();) {
+        AbstractSymbol _type = e.nextElement().get_type();
+
+
+        if(v.contains(_type)) {
+        classTable.semantError(c.getFilename(), c)
+            .println("Multiple cases for one type: " +
+                 _type.getString());
+        // } else if(!classTable.isSubtypeOf()) {
+       
+        } else {
+        v.add(_type);
+        }
+    }
+    }
+```
+Na classe `Cases`, a função `get_type` determina o tipo de uma expressão `typcase` seguindo estas etapas:
+Verifica se há casos. Se não houver, retorna `Object` para evitar erros de tipo..
+Busca o primeiro tipo válido compatível com o tipo da expressão analisada.
+Calcula o LUB dos tipos válidos para encontrar o tipo mais específico possível que ainda seja compatível com todos os casos.
+```
+public AbstractSymbol get_type(SymbolTable objectTable,
+                   SymbolTable methodTable,
+                   ClassTable classTable,
+                   typcase t) {
+
+
+    Enumeration<Case> e = getElements();
+    if(!e.hasMoreElements()) {
+        return TreeConstants.Object_;
+    }
+
+
+    // Get the first valid element type
+    AbstractSymbol return_type = null;
+    for(; e.hasMoreElements();) {
+        AbstractSymbol temp = e.nextElement().get_type();
+        if(classTable.isSubtypeOf(t.get_expr_type(), temp)) {
+        return_type = temp;
+        break;
+        }
+    }
+
+
+    // If no valid type found, return No_type
+    if(return_type == null)
+        return TreeConstants.Object_;
+
+
+    // Get valid return type
+    e = getElements();
+    for(; e.hasMoreElements();) {
+        AbstractSymbol temp = e.nextElement().get_type();
+
+
+        // Lub of all legal types is the return type
+        if(classTable.isSubtypeOf(temp, t.get_expr_type())) {
+        return_type = classTable.lub(return_type,
+                         temp);
+        }
+    }
+
+
+    return return_type;
+    }
+
+```
+Na classe `cond`, temos como construtor uma função que recebe 3 parâmetros:
+Expressão do if (a1)
+Expressão para then (a2)
+Expressão para else (a3)
+	Dentro da função semant dessa mesma classe, avaliamos se a1 é do tipo booleano e caso não, é retornado um erro. 
+```
+if(!pred.get_type().equals(TreeConstants.Bool)) {
+        classTable.semantError(c.getFilename(), c)
+        .println("Expected boolean type in if statement; got "
+             + pred.get_type().getString());
+    }
+
+```
+Determinamos também dentro dessa função qual o tipo de retorno daquela expressão `if-else`, retornando o `least upper bound` de a2 e de a3.
+
+```
+set_type(classTable.lub(then_exp.get_type(),
+                else_exp.get_type()));
+```
+
+No geral foram avaliados operadores matemáticos, expressões de repetição, expressões condicionais, operadores de comparação, constantes, expressões let, definições de block, typcase, dispatch e dispatch estático,`isVoid`, `new`, tratativas de métodos e comparadores.
+Tratamento de erros
+Os erros já são tratados dentro da própria classe que lida com aquela expressão. São analisados erros de falta de parâmetros, identificadores ilegais, más construções, repetições de variáveis e/ou de nome de métodos e classes, entre outros. As tratativas seguem esse modelo:
+```
+if(!t1.equals(t2)) {
+            classTable.semantError(c.getFilename(), c)
+                .println("Illegal argument in overriding method "
+                     + name.getString() + " Expected "
+                     + t1.getString() + ", Found "
+                     + t2.getString());
+            }
+, onde o erro é testado e mostrado na tela.
+
+if(!pred.get_type().equals(TreeConstants.Bool)) { 
+
+classTable.semantError(c.getFilename(), c) 
+.println("Expected boolean type in if statement; got " + 
+pred.get_type().getString()); 
+}
+```
+
+Sem essa verificação, poderiam ocorrer erros em tempo de execução devido à inconsistência de tipos. Por exemplo, tentar somar um Int com um String, ou acessar métodos específicos de um tipo em uma expressão cujo tipo é desconhecido. Essa análise garante que o programa COOL seja tipado estaticamente, ou seja, os erros de tipo são detectados antes da execução.
 
 ### ClassTable.java
 Esta classe é um espaço reservado para alguns métodos, incluindo relatórios de erros e inicialização de classes básica. Usada para armazenar e gerenciar informações semânticas de classes em COOL, a ClassTable controla a hierarquia de herança e tipos básicos, valida identificadores e métodos, e permite verificar relações de subtipos entre classes.
