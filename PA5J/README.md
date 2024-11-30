@@ -9,6 +9,8 @@
 ## Descrição do Projeto
 
 ## Código
+### CgenClassTable.java
 
+Esse código implementa a classe CgenClassTable, que lida com a estrutura de herança das classes Cool e gera código assembly para a execução do programa.
 
 ## Testes
