@@ -45,7 +45,8 @@ Essa classe possui vários métodos, mas podemos separá-los nas seguintes etapa
     * Tabelas de atributos e métodos.
     * Gera o código para inicializadores e métodos.
  
-  Resumindo, o compilador lê o programa Cool e cria um conjunto de classes. A CgenClassTable vai então instalar as classes básicas e as classes do programa, construir a árvore de herança e gerar as tabelas e o código assembly para inicialização e execução. 
+
+Resumindo, o compilador lê o programa Cool e cria um conjunto de classes. A CgenClassTable vai então instalar as classes básicas e as classes do programa, construir a árvore de herança e gerar as tabelas e o código assembly para inicialização e execução. 
 
 ### cool-tree.java
 
