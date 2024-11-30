@@ -100,10 +100,8 @@ Para as implementações da classe `static_dispatch` foi desenvolvido o código 
             CgenSupport.emitComment(s, "Done pushing argument of type " + tmp.get_type() + " to current frame");
         }
 
-        //evaluate object expression
         expr.code(s, cgenTable);
 
-        //handle dispatch on void
         int notVoidDispatchLabel = CgenNode.getLabelCountAndIncrement();
         CgenNode selfie = (CgenNode) cgenTable.lookup(TreeConstants.self);
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, notVoidDispatchLabel, s);
@@ -112,15 +110,9 @@ Para as implementações da classe `static_dispatch` foi desenvolvido o código 
         CgenSupport.emitJal("_dispatch_abort", s);
         CgenSupport.emitLabelDef(notVoidDispatchLabel, s);
 
-        //if not void continue as normal
-
-        //load dispatch table into T1
-
-        //CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
         CgenSupport.emitLoadAddress(CgenSupport.T1, type_name + CgenSupport.DISPTAB_SUFFIX, s);
         CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.T1, s);
         c1.printMethodOffsets();
-        //get offset in distpatch table to desired method and execute method
         CgenSupport.emitLoad(CgenSupport.T1, c1.getMethodOffset(name), CgenSupport.T1, s);
         CgenSupport.emitJalr(CgenSupport.T1, s);
 
@@ -138,7 +130,6 @@ Aqui tratamos do `dispatch`, que trata de despachos também, porém dinamicament
 public void code(PrintStream s, CgenClassTable cgenTable) {
         AbstractSymbol exprType = expr.get_type();
         if (exprType.equals(TreeConstants.SELF_TYPE)) {
-            // assign the current type to exprType 
             exprType = CgenNode.getCurrentType();
         }
         CgenNode c1 = (CgenNode) cgenTable.lookup(exprType);
@@ -147,17 +138,13 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
         for(Enumeration en = actual.getElements(); en.hasMoreElements(); ) {
             Expression tmp = (Expression) en.nextElement();
             CgenSupport.emitComment(s, "Evaluating and pushing argument of type "+tmp.get_type()+ " to current frame");
-            //Evaluate expression
             tmp.code(s, cgenTable);
-            //push value of expression to stack
             CgenSupport.emitPush(CgenSupport.ACC,s);
             CgenSupport.emitComment(s, "Done pushing argument of type "+tmp.get_type()+ " to current frame");
         }
 
-        //evaluate object expression
         expr.code(s, cgenTable);
 
-        //handle dispatch on void
         int notVoidDispatchLabel = CgenNode.getLabelCountAndIncrement();
         CgenNode selfie = (CgenNode) cgenTable.lookup(TreeConstants.self);
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, notVoidDispatchLabel, s);
@@ -166,12 +153,8 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitJal("_dispatch_abort",s);
         CgenSupport.emitLabelDef(notVoidDispatchLabel, s);
 
-        //if not void continue as normal
 
-        //load dispatch table into T1
         CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
-        //c1.printMethodOffsets();
-        //get offset in distpatch table to desired method and execute method
         CgenSupport.emitLoad(CgenSupport.T1, c1.getMethodOffset(name), CgenSupport.T1, s);
         CgenSupport.emitJalr(CgenSupport.T1, s);
 
@@ -192,12 +175,9 @@ O método `code` aqui implementa a geração de código para as estruturas condi
         int ifFalseLabel = CgenNode.getLabelCountAndIncrement();
         int ifTrueLabel = CgenNode.getLabelCountAndIncrement();
         int ifEndLabel = CgenNode.getLabelCountAndIncrement();
-        //evaluate predicate
         pred.code(s, cgenTable);
         CgenSupport.emitLoadBool(CgenSupport.T1, BoolConst.truebool, s);
-        //branch on predicate value
         CgenSupport.emitBeq(CgenSupport.ACC, CgenSupport.T1, ifTrueLabel, s);
-        //if pred is false
         CgenSupport.emitLabelDef(ifFalseLabel, s);
         else_exp.code(s, cgenTable);
         CgenSupport.emitBranch(ifEndLabel, s);
@@ -217,24 +197,15 @@ Esse método faz a tradução da lógica de um loop em código de máquina. Ele 
 ```
 public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for loop");
-        //make two labels one for while loop and one for end of while loop
         int whileLabel = CgenNode.getLabelCountAndIncrement();
         int whileEndLabel = CgenNode.getLabelCountAndIncrement();
-        //while loop label definition
         CgenSupport.emitLabelDef(whileLabel, s);
-        //evaluate predicate
         pred.code(s, cgenTable);
-        //load true boolean const
         CgenSupport.emitLoadBool(CgenSupport.T1, BoolConst.truebool, s);
-        //check to see if predicate value is not equal to true
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.T1, whileEndLabel,s);
-        //CgenSupport.emitLabelDef(whileLabel, s);
-        //evaluate body
         body.code(s, cgenTable);
         CgenSupport.emitBranch(whileLabel,s);
-        //end of while loop label
         CgenSupport.emitLabelDef(whileEndLabel, s);
-        //CgenSupport.emitLoadImm(CgenSupport.ACC, 0, s);
         CgenSupport.emitComment(s, "Leaving cgen for loop");
 
     }
@@ -243,5 +214,462 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
 A execução se dá quando se define os rótulos whileLabel e whileEndLabel e gera código para avaliar a condição. Se a condição for falsa, desvia para o rótulo whileEndLabel. Se a condição for verdadeira, executa o corpo do laço e volta para whileLabel. Por fim, sai do laço quando a condição não for mais verdadeira. Importante ressaltar aqui o uso de rótulos, que são essenciais para controlar o fluxo de repetição e a saída do laço.
 
 - Classe `typcase`
+
+Este método é usado em linguagens orientadas a objetos, permitindo a execução baseada no tipo em tempo de execução.
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        List<branch> caseList = new ArrayList<branch>();
+        for (Enumeration e = cases.getElements(); e.hasMoreElements();) {
+            branch c = (branch) e.nextElement();
+            caseList.add(c);
+        }
+
+        CgenSupport.emitComment(s, "Entering cgen for case");
+
+        expr.code(s, cgenTable);
+
+        int notVoidDispatchLabel = CgenNode.getLabelCountAndIncrement();
+        CgenNode selfie = (CgenNode) cgenTable.lookup(TreeConstants.self);
+        CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, notVoidDispatchLabel, s);
+        CgenSupport.emitLoadString(CgenSupport.ACC, (StringSymbol) selfie.getFilename(), s);
+        CgenSupport.emitLoadImm(CgenSupport.T1, this.lineNumber, s);
+        CgenSupport.emitJal("_case_abort2", s);
+        CgenSupport.emitLabelDef(notVoidDispatchLabel, s);
+
+        CgenNode c1 = (CgenNode) cgenTable.lookup(expr.get_type());
+        int curr_tag = cgenTable.getTagId(c1.name);
+
+        int caseBeginLabel = CgenNode.getLabelCountAndIncrement();
+        int lubMatchLabel = CgenNode.getLabelCountAndIncrement();
+        int noMatchLabel = CgenNode.getLabelCountAndIncrement();
+
+
+        CgenSupport.emitLoadImm(CgenSupport.T1, curr_tag, s);
+        CgenSupport.emitLabelDef(caseBeginLabel, s);
+        CgenSupport.emitBeq(CgenSupport.T1, "-2", noMatchLabel, s);
+        for(branch b : caseList){
+            int next_branch_label = CgenNode.getLabelCountAndIncrement();
+            int branch_tag = cgenTable.getTagId(b.type_decl);
+            CgenSupport.emitLoadImm(CgenSupport.T2, branch_tag, s);
+            CgenSupport.emitBne(CgenSupport.T1, CgenSupport.T2, next_branch_label, s);
+            b.expr.code(s, cgenTable);
+            CgenSupport.emitBranch(lubMatchLabel, s);
+            CgenSupport.emitLabelDef(next_branch_label, s);
+        }
+        CgenSupport.emitLoadAddress(CgenSupport.T1, "class_parentTab", s);
+        CgenSupport.emitLoad(CgenSupport.T1, curr_tag, CgenSupport.T1, s);
+        CgenSupport.emitBranch(caseBeginLabel, s);
+
+        CgenSupport.emitLabelDef(noMatchLabel, s);
+        CgenSupport.emitJal("_case_abort", s);
+
+        CgenSupport.emitLabelDef(lubMatchLabel, s);
+
+        CgenSupport.emitComment(s, "leaving cgen for case");
+    }
+```
+O código avalia a expressão base (expr), trata o caso de objeto null (chama _case_abort2 se necessário), determina o tipo do objeto avaliado, itera pelos ramos para encontrar um tipo correspondente, onde executa o código do ramo correspondente, ou tenta o tipo do pai se não houver correspondência, e aborta o programa (_case_abort) se nenhum ramo for encontrado.
+
+- Classe `block`
+
+O método implementa a geração de código para um bloco delimitado por {} em cool.
+O valor do bloco como um todo é o valor da última expressão avaliada. O método traduz essa lógica em código.
+
+```
+    public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for block");
+        for (Enumeration e = body.getElements(); e.hasMoreElements(); ) {
+            ((Expression) e.nextElement()).code(s, cgenTable);
+        }
+        CgenSupport.emitComment(s, "Leaving cgen for block");
+    }
+```
+
+O método inicia com um comentário para rastreamento, onde ele itera sobre todas as expressões no bloco, avaliando cada expressão na ordem. Conclui com um comentário indicando o fim da geração de código para o bloco.
+
+- Classe `let`
+
+O método trata da geração de código para uma expressão let, onde uma variável local é criada, inicializada e utilizada dentro de um escopo específico. Ele possui os elementos essenciais para lidar com a inicialização da variável e seu armazenamento na pilha.
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for let with identifier " + identifier);
+        init.code(s, cgenTable);
+        CgenSupport.emitPush(CgenSupport.ACC,s);
+        int offsetLet = CgenSupport.WORD_SIZE*2;
+
+
+        CgenSupport.emitComment(s, "Leaving cgen for let with identifier " + identifier);
+    }
+```
+
+O código cria um novo escopo na tabela de símbolos, avaliando a expressão inicial.
+Em seguida, usa um valor padrão (ex.: 0) se não houver inicialização explícita e empilha o valor avaliado para alocar espaço para a variável. Por fim, gera o código para o corpo do let, onde a variável inicializada pode ser usada, removendo a variável da pilha e encerrando o escopo.
+
+- Classe `plus`
+
+Este método implementa a geração de código para uma operação de adição. Ele processa dois operandos (e1 e e2), realiza a operação de soma e armazena o resultado em um novo objeto inteiro, usando um modelo de heap para gerenciar números inteiros encapsulados.
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for addition");
+        e1.code(s, cgenTable);
+        CgenSupport.emitPush(CgenSupport.ACC, s);
+
+        e2.code(s, cgenTable);
+
+        CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
+        CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
+
+
+        CgenSupport.emitAdd(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
+
+        CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
+        CgenSupport.emitComment(s, "Leaving cgen for addition");
+    }
+
+```
+
+A execução se dá da seguinte forma:
+Avalia e1 e empilha o valor na pilha, avalia e2 e mantém o resultado em $a0, cria um novo objeto inteiro para armazenar o resultado, recupera os valores inteiros de e1 (da pilha) e e2 ($a0), realiza a soma dos dois valores inteiros, armazena o resultado no novo objeto inteiro e libera o espaço usado na pilha para e1.
+
+- Classe `sub`
+
+O `sub` implementa a geração de código para uma operação de subtração no contexto de um compilador orientado a objetos. Assim como na adição, ele trabalha com números representados como objetos, o que requer extração, manipulação e armazenamento dos valores numéricos dentro desses objetos.
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for subtract");
+        e1.code(s, cgenTable);
+        CgenSupport.emitPush(CgenSupport.ACC, s);
+
+        e2.code(s, cgenTable);
+
+        CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
+        CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitSub(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
+
+        CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
+        CgenSupport.emitComment(s, "Leaving cgen for subtract");
+    }
+```
+
+O fluxo é parecido, dado pela avaliação de e1 e e2, criação um novo objeto para armazenar o resultado, extração dos valores inteiros de e1 (da pilha) e e2 (de $a0), subtração (e1 - e2) e armazenamento do resultado no novo objeto e por fim libera o espaço reservado para e1 na pilha.
+
+- Classe `mul`
+
+Aqui é implementada a geração de código para uma operação de multiplicação no contexto de um compilador que trata números como objetos. Ele segue um padrão semelhante aos métodos para soma e subtração, ajustando a operação aritmética para multiplicação.
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for multiply");
+        e1.code(s, cgenTable);
+        CgenSupport.emitPush(CgenSupport.ACC, s);
+
+        e2.code(s, cgenTable);
+
+        CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
+        CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
+
+
+        CgenSupport.emitMul(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
+
+        CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
+        CgenSupport.emitComment(s, "Leaving cgen for multiply");
+    }
+```
+
+O fluxo avalia e1 e empilha o resultado, avalia e2 e mantém o resultado em $a0, cria um novo objeto para armazenar o resultado da multiplicação, extrai os valores inteiros de e1 (da pilha) e e2 (de $a0), realiza a operação de multiplicação (e1 * e2) e armazena o resultado no novo objeto e libera o espaço na pilha usado por e1.
+
+- Classe `divide`
+
+O método abaixo implementa a geração de código para uma operação de divisão no contexto de um compilador cool. Ele segue um padrão semelhante às outras operações aritméticas (soma, subtração, multiplicação), ajustando a operação para divisão.
+
+```
+    public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for divide");
+        e1.code(s, cgenTable);
+        CgenSupport.emitPush(CgenSupport.ACC, s);
+
+        e2.code(s, cgenTable);
+
+        CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
+
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
+        CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitDiv(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
+
+        CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
+        CgenSupport.emitComment(s, "Leaving cgen for divide");
+    }
+```
+
+Como o método é semelhante, o fluxo também é semelhante sendo dado quando avalia e1 e empilha o resultado, avalia e2 e mantém o resultado em $a0, cria um novo objeto para armazenar o resultado da divisão, extrai os valores inteiros de e1 (da pilha) e e2 (de $a0), realiza a operação de divisão (e1 / e2) e armazena o resultado no novo objeto e Libera o espaço na pilha usado por e1.
+
+- Classe `neg`
+
+O método implementa a geração de código para uma operação de negação aritmética (como -x). Ele inverte o valor de um número inteiro representado como um objeto, criando um novo objeto com o valor negado.
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entering cgen for negate");
+        e1.code(s, cgenTable);
+
+        CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.ACC, s);
+        CgenSupport.emitNeg(CgenSupport.T1, CgenSupport.T1, s);
+        CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
+        CgenSupport.emitComment(s, "Leaving cgen for negate");
+    }
+```
+
+Resumidamente, ele avalia e1 e mantém o resultado em $a0, cria um novo objeto inteiro para armazenar o resultado da negação, extrai o valor numérico de e1 do objeto, realiza a operação de negação aritmética (-x) e armazena o valor negado no novo objeto.
+
+- Classe `lt`
+
+Aqui implementa-se a geração de código para a operação de comparação "menor que" (<) entre duas expressões em uma linguagem do compilador cool. A operação é realizada considerando que os operandos são objetos inteiros, e o resultado é um valor booleano (true ou false), representando se o primeiro operando é menor que o segundo.
+
+```
+    public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entering cgen for less than");
+        e1.code(s, cgenTable);
+        CgenSupport.emitMove(CgenSupport.T1, CgenSupport.ACC, s);
+        e2.code(s, cgenTable);
+
+        int labelCountTrue = CgenNode.getLabelCountAndIncrement();
+        int labelCountFalse = CgenNode.getLabelCountAndIncrement();
+        int labelCountEnd = CgenNode.getLabelCountAndIncrement();
+
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
+        CgenSupport.emitLoad(CgenSupport.ACC, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitBlt(CgenSupport.T1, CgenSupport.ACC, labelCountTrue, s);
+        CgenSupport.emitLabelDef(labelCountFalse, s);
+        CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.falsebool,s);
+        CgenSupport.emitBranch(labelCountEnd, s);
+        CgenSupport.emitLabelDef(labelCountTrue,s);
+        CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.truebool,s);
+        CgenSupport.emitLabelDef(labelCountEnd, s);
+        CgenSupport.emitComment(s, "Leaving cgen for less than");
+    }
+```
+
+Esse código avalia as expressões e1 e e2, movendo e1 para um registrador temporário ($T1), acessa os valores inteiros de e1 e e2 e realiza a comparação e1 < e2. Se e1 < e2, retorna true. Caso contrário, retorna false.
+
+- Classe `eq`
+
+O método abaixo implementa a geração de código para a operação de igualdade (==). Ele avalia duas expressões (e1 e e2) e determina se elas são iguais. A operação utiliza uma função auxiliar chamada equality_test para realizar a comparação, retornando um valor booleano (true ou false).
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entering cgen for equal to");
+
+        int equalLabel = CgenNode.getLabelCountAndIncrement();
+
+        e1.code(s, cgenTable);
+        CgenSupport.emitMove(CgenSupport.T1, CgenSupport.ACC, s);
+        e2.code(s, cgenTable);
+        CgenSupport.emitMove(CgenSupport.T2, CgenSupport.ACC, s);
+
+        CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.truebool, s);
+        CgenSupport.emitLoadBool(CgenSupport.A1, BoolConst.falsebool, s);
+        CgenSupport.emitJal("equality_test", s);
+
+        CgenSupport.emitLabelDef(equalLabel, s);
+
+        CgenSupport.emitComment(s, "Leaving cgen for equal to");
+    }
+```
+
+Ele avalia e1 e move o resultado para um registrador temporário (T1), avalia e2 e move o resultado para outro registrador temporário (T2). Após isso, carrega os valores booleanos true e false nos registradores apropriados ($ACC e $A1) e invoca a função equality_test para comparar os dois valores, além de definir um rótulo para a saída da operação e garantir que o valor booleano final esteja em $ACC.
+
+- Classe `leq`
+
+O método implementa a geração de código para a operação "menor ou igual a" (<=). Ele avalia duas expressões (e1 e e2), compara seus valores numéricos e retorna true ou false como resultado.
+
+```
+    public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entering cgen for less than or equal to");
+        e1.code(s, cgenTable);
+        CgenSupport.emitMove(CgenSupport.T1, CgenSupport.ACC, s);
+        e2.code(s, cgenTable);
+
+        int labelCountTrue = CgenNode.getLabelCountAndIncrement();
+        int labelCountFalse = CgenNode.getLabelCountAndIncrement();
+        int labelCountEnd = CgenNode.getLabelCountAndIncrement();
+
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
+        CgenSupport.emitLoad(CgenSupport.ACC, 3, CgenSupport.ACC, s);
+
+        CgenSupport.emitBleq(CgenSupport.T1, CgenSupport.ACC, labelCountTrue, s);
+        CgenSupport.emitLabelDef(labelCountFalse, s);
+        CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.falsebool,s);
+        CgenSupport.emitBranch(labelCountEnd, s);
+        CgenSupport.emitLabelDef(labelCountTrue,s);
+        CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.truebool,s);
+        CgenSupport.emitLabelDef(labelCountEnd, s);
+        CgenSupport.emitComment(s, "Leaving cgen for less than or equal to");
+    }
+```
+
+Aqui é avaliado e1 e armazenado o valor no registrador temporário $T1 e também avalia e2 e armazena o valor em $ACC.Depois de extrair os valores numéricos das expressões (armazenados como objetos inteiros), realiza a comparação e1 <= e2 usando o comando de salto condicional bleq (branch if less than or equal).Além disso, usa rótulos para organizar o controle de fluxo:
+labelCountTrue: Caso a comparação seja verdadeira.
+labelCountFalse: Caso a comparação seja falsa.
+labelCountEnd: Ponto final da operação.
+
+- Classe `comp`
+
+O método implementa a geração de código para a operação lógica de negação (not). Ele inverte o valor booleano de uma expressão (true se torna false e vice-versa).
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+
+        CgenSupport.emitComment(s, "Entered cgen for not");
+        e1.code(s, cgenTable);
+        CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.ACC, s);
+        CgenSupport.emitLoadImm(CgenSupport.T2, 1, s);
+
+        int labelCountTrue = CgenNode.getLabelCountAndIncrement();
+        int labelCountFalse = CgenNode.getLabelCountAndIncrement();
+        int labelCountEnd = CgenNode.getLabelCountAndIncrement();
+
+        CgenSupport.emitBeq(CgenSupport.T1, CgenSupport.T2, labelCountTrue, s);
+        CgenSupport.emitLabelDef(labelCountFalse, s);
+        CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.truebool, s);
+        CgenSupport.emitBranch(labelCountEnd, s);
+        CgenSupport.emitLabelDef(labelCountTrue,s);
+        CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.falsebool, s);
+
+        CgenSupport.emitLabelDef(labelCountEnd,s);
+
+        CgenSupport.emitComment(s, "Leaving cgen for not");
+    }
+```
+
+Aqui ele avalia a expressão e1 para determinar seu valor booleano, verifica o valor de e1 (true ou false) e inverte o valor. Se e1 for true, o resultado será false, se e1 for false, o resultado será true.
+Abaixo, os rótulos usados para controle de fluxo:
+labelCountTrue: Define o comportamento para o caso em que e1 é true.
+labelCountFalse: Define o comportamento para o caso em que e1 é false.
+labelCountEnd: Marca o final da operação.
+
+- Classe `int_const`
+
+Já esse método implementa a geração de código para uma constante inteira em uma linguagem de compilador orientado a objetos. O objetivo é carregar uma constante inteira previamente definida (como 5 ou 42) no registrador acumulador ($ACC).
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for int const expression");
+        CgenSupport.emitLoadInt(CgenSupport.ACC,
+                (IntSymbol)AbstractTable.inttable.lookup(token.getString()), s);
+        CgenSupport.emitComment(s, "Leaving cgen for int const expression");
+    }
+```
+
+Seu fluxo consiste basicamente na busca na Tabela de Símbolos, localizando o símbolo associado ao valor da constante inteira e carregando o objeto constante no acumulador ($ACC).Por fim adiciona comentários para marcar o início e o fim do processo.
+
+- Classe `bool_const`
+
+Nesse método é implementado a geração de código para uma constante booleana (true ou false) em uma linguagem de compilador orientado a objetos. O objetivo é carregar o valor booleano especificado no registrador acumulador ($ACC).
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for bool const expression");
+        CgenSupport.emitLoadBool(CgenSupport.ACC, new BoolConst(val), s);
+        CgenSupport.emitComment(s, "Leaving cgen for bool const expression");
+    }
+```
+
+Ele instancia um objeto BoolConst com base no valor de val, carrega o objeto booleano correspondente (true ou false) no acumulador ($ACC) e adiciona comentários para facilitar a depuração.
+
+- Classe `string_const`
+
+```
+    public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for string const expression");
+        CgenSupport.emitLoadString(CgenSupport.ACC,
+                (StringSymbol)AbstractTable.stringtable.lookup(token.getString()), s);
+        CgenSupport.emitComment(s, "Leaving cgen for string const expression");
+    }
+```
+
+- Classe `new_`
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for new");
+        CgenSupport.emitLoadAddress(CgenSupport.ACC, this.type_name.toString()+"_protObj", s);
+        CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
+        CgenSupport.emitJal(this.type_name.toString()+"_init", s);
+        CgenSupport.emitComment(s, "Leaving cgen for new");
+    }
+```
+
+- Classe `isvoid`
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for new");
+        CgenSupport.emitLoadAddress(CgenSupport.ACC, this.type_name.toString()+"_protObj", s);
+        CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
+        CgenSupport.emitJal(this.type_name.toString()+"_init", s);
+        CgenSupport.emitComment(s, "Leaving cgen for new");
+    }
+```
+
+- Classe `no_expr`
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered and exited cgen for no expression");
+        CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.ZERO, s);
+    }
+```
+
+- Classe `object`
+
+```
+public void code(PrintStream s, CgenClassTable cgenTable) {
+        CgenSupport.emitComment(s, "Entered cgen for object: "+name);
+        if(this.name.equals(TreeConstants.self)){
+            CgenSupport.emitMove(CgenSupport.ACC,CgenSupport.SELF, s);
+        }else {
+            if(cgenTable.probe(this.name) == null) {
+                Object lookUpSelf = cgenTable.lookup(TreeConstants.self);
+                CgenNode nd = (CgenNode) lookUpSelf;
+                int attrOffset = CgenNode.attrOffsetMap.get(nd.name).get(name);
+                CgenSupport.emitLoad(CgenSupport.ACC, (2+attrOffset), CgenSupport.SELF, s);
+            } else {
+                int frameOffset = (Integer) cgenTable.probe(name) + 1;
+                CgenSupport.emitLoad(CgenSupport.ACC, frameOffset, CgenSupport.FP, s);
+            }
+        }
+        CgenSupport.emitComment(s, "Exited cgen for object");
+    }
+```
 
 ## Testes
