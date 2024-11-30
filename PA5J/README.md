@@ -14,13 +14,38 @@
 Esse código implementa a classe CgenClassTable, que lida com a estrutura de herança das classes Cool e gera código assembly para a execução do programa. Ela organiza as classes do programa em uma árvore de herança; gera tabelas de apoio para atributos, métodos e constantes; produz o código assembly necessário para inicializar classes e executar métodos; faz uso de outras classes auxiliares (CgenNode, SymbolTable e Cgen Support) para gerenciar a estrutura do compilador.
 
 Essa classe possui vários métodos, mas podemos separá-los nas seguintes etapas principais:
-- Gerenciamento da Árvore de Herança
+- Gerenciamento da Árvore de Herança:
+     * installBasicClasses(): Instala classes básicas de Cool (como Object, IO, Int, Bool, e 
+       String) e as adiciona na árvore de herança.
+     * installClasses(): Adiciona as classes definidas pelo programador na árvore de herança.
+     * buildInheritanceTree(): Conecta cada classe ao seu pai na árvore, definindo relações 
+       de herança.
 
-- Gerenciamento de Tabelas
+- Gerenciamento de Tabelas: criação das tabelas que suportam a execução do programa
+    * classTagMap: Associa cada classe a um número único (um "tag").
+    * Tabelas globais: Criadas no método codeGlobalData() para mapear nomes de classes, 
+       constantes, e funções de coleta de lixo.
+    * Tabelas de atributos e métodos: Incluem informações sobre os atributos e métodos de 
+      cada classe, geradas com métodos como codeAttrTables() e codeClassMethods().
 
 - Geração de Código Assembly
+    * codeConstants(): Cria representações de constantes (como strings e inteiros) no 
+      assembly.
+    * codeGlobalText(): Define referências globais no segmento .text do assembly, como 
+      inicializadores e métodos.
+    * codeObjInit() e codeClassMethods(): Geram o código para inicializar objetos e 
+      implementar os métodos de cada classe.
 
-- Função Principal
+- Função Principal: code()
+    * Preenche o mapa de "tags" das classes.
+    * Gera dados globais e constantes.
+    * Constrói tabelas de apoio como:
+    * class_nameTab (tabela de nomes de classes).
+    * class_objTab (tabela de objetos protótipos das classes).
+    * Tabelas de atributos e métodos.
+    * Gera o código para inicializadores e métodos.
+ 
+  Resumindo, o compilador lê o programa Cool e cria um conjunto de classes. A CgenClassTable vai então instalar as classes básicas e as classes do programa, construir a árvore de herança e gerar as tabelas e o código assembly para inicialização e execução. 
 
 ### cool-tree.java
 
