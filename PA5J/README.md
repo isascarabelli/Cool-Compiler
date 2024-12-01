@@ -47,9 +47,7 @@ Essa classe possui vários métodos, mas podemos separá-los nas seguintes etapa
 - Função Principal: code()
     * Preenche o mapa de "tags" das classes.
     * Gera dados globais e constantes.
-    * Constrói tabelas de apoio como:
-    * class_nameTab (tabela de nomes de classes).
-    * class_objTab (tabela de objetos protótipos das classes).
+    * Constrói tabelas de apoio como: class_nameTab (tabela de nomes de classes) e class_objTab (tabela de objetos protótipos das classes).
     * Tabelas de atributos e métodos.
     * Gera o código para inicializadores e métodos.
 
@@ -92,6 +90,58 @@ Descrevendo alguns dos principais métodos:
 
 
 Resumindo, o compilador lê o programa Cool e cria um conjunto de classes. A CgenClassTable vai então instalar as classes básicas e as classes do programa, construir a árvore de herança e gerar as tabelas e o código assembly para inicialização e execução. 
+
+
+### CgenNode.java
+Essa classe representa um nó na hierarquia de classes e ajuda na construção e emissão de código para um compilador da linguagem. Traremos aqui uma explicação detalhada dos métodos e atributos presentes:
+* Atributos:
+   - parent:
+        Referência para o nó pai na árvore de herança.
+        Define a hierarquia de classes, onde cada nó tem apenas um pai.
+   - children:
+        Um vetor que armazena as referências para os filhos na árvore de herança.
+        Permite navegar pela hierarquia para realizar operações como construção de tabelas de despacho.
+   - basic_status:
+        Um indicador se a classe é uma das classes básicas da linguagem.
+        Pode assumir dois valores:
+        Basic: É uma classe básica.
+        NotBasic: Não é uma classe básica.
+   - methodList:
+        Uma lista encadeada contendo os métodos da classe atual (incluindo herdados).
+   - methodClass:
+        Um mapa que associa cada método ao nome da classe onde ele foi definido.
+        Útil para resolver conflitos de herança.
+   - attrOffsetMap:
+        Mapeia o deslocamento dos atributos de cada classe.
+        Usado para calcular posições de atributos em objetos de memória.
+  - currentType:
+        Um tipo estático que armazena a classe atual durante a geração de código.
+  - Constantes de classe (OBJECT_CLASS_TAG, IO_CLASS_TAG, etc.):
+        Identificadores numéricos para as classes básicas.
+
+* Alguns métodos importantes:
+  - Relacionados à Hierarquia
+        1. addChild(CgenNode child): Adiciona um nó filho ao vetor children.
+        2. getChildren(): Retorna os filhos como uma enumeração.
+        3. setParentNd(CgenNode parent): Define o nó pai, verificando se já foi atribuído previamente.
+        4. getParentNd(): Retorna o nó pai.
+        6. basic(): Retorna true se a classe é básica, false caso contrário.
+
+  - Geração de Tabelas
+        1. buildDispatchTables(): Constrói a tabela de despacho de métodos para a classe, insere métodos herdados e os redefine conforme necessário e escreve a tabela no fluxo de saída.
+        2. codeClassObjTab(PrintStream str): Emite a tabela de objetos da classe, referenciando o protótipo e o inicializador da classe.
+        3. codeParentTables(PrintStream str): Gera tabelas de pais, úteis para expressões condicionais de tipo.
+        4. codeAttrTables(PrintStream str): Gera tabelas de atributos para ajudar na inicialização.
+
+  - Geração de Protótipos
+        1. codeObjProt(PrintStream str): Gera o protótipo de objeto para a classe e inclui o identificador, tamanho da classe, tabela de despacho e valores padrão dos atributos.
+        2. codeNameTab(PrintStream str): Emite uma tabela de nomes para mapeamento de strings em tempo de execução.
+Inicializadores e Métodos
+        3. codeObjInit(PrintStream str): Gera o código de inicialização para objetos da classe e inicializa atributos e chama inicializadores de classes pai.
+        4. codeClassMethods(PrintStream str): Emite o código para cada método da classe e insere rotinas para preparar o quadro de ativação e restaurar estados após execução.
+
+* Os métodos methodList e attrOffsetMap gerenciam a localização de métodos e atributos em memória. Já os métodos codeObjInit e codeClassMethods usam instruções específicas para emitir código para a arquitetura de destino (provavelmente MIPS).
+* Variáveis estáticas como CURR_CLASS_TAG mantêm o estado global para identificadores únicos e controle de escopo.
 
 ### cool-tree.java
 
