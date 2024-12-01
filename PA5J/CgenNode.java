@@ -46,10 +46,6 @@ class CgenNode extends class_c {
     /** PRIVATE HELPER VARIABLES WE ADDED */
     private LinkedList<AbstractSymbol> methodList; // list of all methods in the current CgenNode
     private HashMap<AbstractSymbol, AbstractSymbol> methodClass; // find class of a method
-    //private HashMap<AbstractSymbol, Integer> methodOffset; // find offset of a method
-    /** Map from Class to Offset to the dispatch table */
-    //private Map<AbstractSymbol, Integer> methodMap;
-    //private static Map<AbstractSymbol, Map<AbstractSymbol, Integer>> methodOffsetMap;
 
     public static Map<AbstractSymbol, Map<AbstractSymbol, Integer>> attrOffsetMap = new HashMap<AbstractSymbol, Map<AbstractSymbol, Integer>>();
 
@@ -70,37 +66,6 @@ class CgenNode extends class_c {
             System.out.println(methodClass.get(name) + "." +name+"="+methodList.indexOf(name));
         }
     }
-
-    //public static int getMethodOffset(AbstractSymbol class_name, AbstractSymbol method_name) {
-    //    Map<AbstractSymbol, Integer> methodOffset = methodOffsetMap.get(class_name);
-    //    if(methodOffset == null) {
-    //        System.out.println("no such class name "+class_name+" exists:");
-    //    }
-    //    Integer off = methodOffset.get(method_name); 
-    //    if(off==null) {
-    //        System.out.println("no such method name "+method_name+" exists in class "+class_name);
-    //    }
-    //    return off;
-    //}
-    //public void printMethodMap() {
-    //    System.out.println("Printing method map");
-    //    Iterator it = methodMap.entrySet().iterator();
-    //    while(it.hasNext()) {
-    //        Map.Entry pairs= (Map.Entry) it.next();
-    //        System.out.println(pairs.getKey() + " = " + pairs.getValue());
-    //        it.remove();
-    //    }
-    //}
-
-    //public Integer getMethodIndex(AbstractSymbol method_name) {
-    //    System.out.println("getMethodIndex on " + method_name);
-    //    System.out.println("the method map: "+ methodMap.get(method_name));
-    //    return 1;
-    //    //return this.methodMap.get(method_name);
-    //}
-
-    // Queue of atrributes used when creating prototype object
-
 
     //static variable that generates class tags
     public final static int OBJECT_CLASS_TAG = 0;
@@ -130,8 +95,7 @@ class CgenNode extends class_c {
         this.parent = null;
         this.children = new Vector();
         this.basic_status = basic_status;
-        //this.methodMap = new HashMap<AbstractSymbol, Integer>(); // added
-        //this.methodOffsetMap = new HashMap<AbstractSymbol, Map<AbstractSymbol, Integer>>();
+       
         AbstractTable.stringtable.addString(name.getString());
         if(c.getName().toString().equals(TreeConstants.Object_.toString())){
             this.tag = OBJECT_CLASS_TAG;
@@ -189,10 +153,6 @@ class CgenNode extends class_c {
         return basic_status == Basic; 
     }
 
-    // functions I added
-    //
-    //
-
     public int getTag(){
         return this.tag;
     }
@@ -207,14 +167,7 @@ class CgenNode extends class_c {
         //CgenSupport.emitComment(str, "Leaving codeClassObjTab");
     }
 
-    /***
-     * Wonder if WE NEED TO PRINT 'class_parentTab' and
-     * 'class_attrTabTab'
-     * Yes I think we do, it will help for case expressions I think
-     * **/
     public void codeParentTables(PrintStream str) {
-        //CgenSupport.emitComment(str, "Entered codeParentTables");
-        //CgenSupport.emitComment(str, "Leaving codeParentTables");
         if(this.tag != 0) //if this node isn't Object
             str.println(CgenSupport.WORD + this.getParentNd().tag);
         else
@@ -224,8 +177,6 @@ class CgenNode extends class_c {
         str.println(CgenSupport.WORD + this.name + "_attrTab");
     }
     public void codeAttrTables(PrintStream str) {
-        //CgenSupport.emitComment(str, "Entered codeAttrTables");
-        //CgenSupport.emitComment(str, "Leaving codeAttrTables");
 
         Stack<attr> attrStack = new Stack<attr>();
         CgenNode curr = this;
@@ -317,11 +268,6 @@ class CgenNode extends class_c {
         str.println(CgenSupport.WORD + this.getName() + CgenSupport.DISPTAB_SUFFIX);
         
         // set up initial values for each attribute
-        //
-        //
-        //IntSymbol defaultVal = (IntSymbol) AbstractTable.inttable.lookup("0");
-        //String nodeName = getName().toString();
-        //DELETE ABOVE TWO LINES
         for(int i = 0;i < attrList.size(); i++) {
             attr at = attrList.get(i);
             AbstractSymbol attrType = at.type_decl;
@@ -355,89 +301,6 @@ class CgenNode extends class_c {
             ((CgenNode) en.nextElement()).codeObjProt(str);
         }
     }
-//    /** emits prototype objects
-//     *
-//     **/
-//    public void codeProtObj(PrintStream str) {
-//        System.out.println("old prot obj on "+getName());
-//        //Add -1 eyecatcher
-//        str.println(CgenSupport.WORD + "-1");
-//
-//        CgenSupport.emitComment(str, "Entered codeProtObj for " + this.name);
-//        str.print(this.getName()+CgenSupport.PROTOBJ_SUFFIX+CgenSupport.LABEL);
-//        Stack<attr> attrStack = new Stack<attr>();
-//
-//        CgenNode curr = this;
-//        while(curr != null) {
-//            List<attr> tmp = new ArrayList<attr>();
-//            for(Enumeration e = curr.getFeatures().getElements(); e.hasMoreElements();){
-//                Feature feat = (Feature) e.nextElement();
-//                if (feat instanceof  attr){
-//                    tmp.add((attr) feat);
-//                }
-//            }
-//            for(int i = tmp.size()-1;i >= 0; i--){
-//                attrStack.push(tmp.get(i));
-//            }
-//            curr = curr.getParentNd();
-//        }
-//
-//        List<attr> attrList = new LinkedList<attr>();
-//        Map<AbstractSymbol, Integer> attrNameIndexMap = new HashMap<AbstractSymbol, Integer>();
-//        int j = 1;
-//        while(!attrStack.empty()){
-//            attr tmp = attrStack.pop();
-//            attrList.add(tmp);
-//            attrNameIndexMap.put(tmp.name, j);
-//            j++;
-//        }
-//        CgenNode.attrOffsetMap.put(this.name, attrNameIndexMap);
-//
-//        // emit class tag id
-//        str.println(CgenSupport.WORD + this.tag);
-//
-//        // emit class size = # attribute + 3
-//        str.println(CgenSupport.WORD + Integer.toString(3 + attrList.size()));
-//
-//        // dispatch tables 
-//        str.println(CgenSupport.WORD + this.getName() + CgenSupport.DISPTAB_SUFFIX);
-//        
-//        // set up initial values for each attribute
-//        //
-//        //
-//        //IntSymbol defaultVal = (IntSymbol) AbstractTable.inttable.lookup("0");
-//        //String nodeName = getName().toString();
-//        //DELETE ABOVE TWO LINES
-//        for(int i = 0;i < attrList.size(); i++) {
-//            attr at = attrList.get(i);
-//            AbstractSymbol attrType = at.type_decl;
-//            if(attrType.equals(TreeConstants.Object_)){
-//                str.println(CgenSupport.WORD + 0);
-//            } else if (attrType.equals(TreeConstants.IO)){
-//                str.println(CgenSupport.WORD + 0);
-//            } else if (attrType.equals(TreeConstants.Main)){
-//                str.println(CgenSupport.WORD + 0);
-//            } else if (attrType.equals(TreeConstants.Int)){   //default value of int is 0
-//                str.print(CgenSupport.WORD);
-//                IntSymbol defaultVal = (IntSymbol) AbstractTable.inttable.lookup("0");
-//                defaultVal.codeRef(str);
-//                str.println();
-//            } else if (attrType.equals(TreeConstants.Bool)){  //default for boolean is false bool const
-//                str.print(CgenSupport.WORD);
-//                BoolConst defaultVal = new BoolConst(false);
-//                defaultVal.codeRef(str);
-//                str.println();
-//            } else if (attrType.equals(TreeConstants.Str)){  //default for string is empty string
-//                str.print(CgenSupport.WORD);
-//                StringSymbol defaultVal = (StringSymbol) AbstractTable.stringtable.lookup("") ;
-//                defaultVal.codeRef(str);
-//                str.println();
-//            } else {        //all other objects are void for default
-//                str.println(CgenSupport.WORD + 0);
-//            }
-//        }
-//        CgenSupport.emitComment(str, "Leaving codeProtObj for " + this.name);
-//    }
 
     ///**
     // * emits dispatch tables
