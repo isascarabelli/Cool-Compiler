@@ -569,20 +569,15 @@ class assign extends Expression {
 
         expr.code(s, cgenTable);
 
-        //First check if this variable is in current scope
         if(cgenTable.probe(name) == null) {
-            //not in current scope so it must be an attribute, so get offset of attribute
-            // and load into current scope
             CgenNode nd = (CgenNode) cgenTable.lookup(TreeConstants.self);
             int attrOffset = CgenNode.attrOffsetMap.get(nd.name).get(name);
             CgenSupport.emitStore(CgenSupport.ACC, (2+attrOffset), CgenSupport.SELF, s);
-            // garbage collect
             if (Flags.cgen_Memmgr != Flags.GC_NOGC) {
                 CgenSupport.emitAddiu(CgenSupport.A1, CgenSupport.SELF, attrOffset,s);
                 CgenSupport.emitJal("_GenGC_Assign", s);
             }
         } else {
-            //is in the current scope, so get offset in frame and load into $a0
             int frameOffset = (Integer) cgenTable.probe(name);
             CgenSupport.emitStore(CgenSupport.ACC, frameOffset, CgenSupport.FP, s);
         }
@@ -654,17 +649,13 @@ class static_dispatch extends Expression {
         for(Enumeration en = actual.getElements(); en.hasMoreElements(); ) {
             Expression tmp = (Expression) en.nextElement();
             CgenSupport.emitComment(s, "Evaluating and pushing argument of type "+tmp.get_type()+ " to current frame");
-            //Evaluate expression
             tmp.code(s, cgenTable);
-            //push value of expression to stack
             CgenSupport.emitPush(CgenSupport.ACC, s);
             CgenSupport.emitComment(s, "Done pushing argument of type " + tmp.get_type() + " to current frame");
         }
 
-        //evaluate object expression
         expr.code(s, cgenTable);
 
-        //handle dispatch on void
         int notVoidDispatchLabel = CgenNode.getLabelCountAndIncrement();
         CgenNode selfie = (CgenNode) cgenTable.lookup(TreeConstants.self);
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, notVoidDispatchLabel, s);
@@ -673,15 +664,9 @@ class static_dispatch extends Expression {
         CgenSupport.emitJal("_dispatch_abort", s);
         CgenSupport.emitLabelDef(notVoidDispatchLabel, s);
 
-        //if not void continue as normal
-
-        //load dispatch table into T1
-
-        //CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
         CgenSupport.emitLoadAddress(CgenSupport.T1, type_name + CgenSupport.DISPTAB_SUFFIX, s);
         CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.T1, s);
         c1.printMethodOffsets();
-        //get offset in distpatch table to desired method and execute method
         CgenSupport.emitLoad(CgenSupport.T1, c1.getMethodOffset(name), CgenSupport.T1, s);
         CgenSupport.emitJalr(CgenSupport.T1, s);
 
@@ -742,7 +727,6 @@ class dispatch extends Expression {
     public void code(PrintStream s, CgenClassTable cgenTable) {
         AbstractSymbol exprType = expr.get_type();
         if (exprType.equals(TreeConstants.SELF_TYPE)) {
-            // assign the current type to exprType 
             exprType = CgenNode.getCurrentType();
         }
         CgenNode c1 = (CgenNode) cgenTable.lookup(exprType);
@@ -751,17 +735,13 @@ class dispatch extends Expression {
         for(Enumeration en = actual.getElements(); en.hasMoreElements(); ) {
             Expression tmp = (Expression) en.nextElement();
             CgenSupport.emitComment(s, "Evaluating and pushing argument of type "+tmp.get_type()+ " to current frame");
-            //Evaluate expression
             tmp.code(s, cgenTable);
-            //push value of expression to stack
             CgenSupport.emitPush(CgenSupport.ACC,s);
             CgenSupport.emitComment(s, "Done pushing argument of type "+tmp.get_type()+ " to current frame");
         }
 
-        //evaluate object expression
         expr.code(s, cgenTable);
 
-        //handle dispatch on void
         int notVoidDispatchLabel = CgenNode.getLabelCountAndIncrement();
         CgenNode selfie = (CgenNode) cgenTable.lookup(TreeConstants.self);
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, notVoidDispatchLabel, s);
@@ -770,12 +750,7 @@ class dispatch extends Expression {
         CgenSupport.emitJal("_dispatch_abort",s);
         CgenSupport.emitLabelDef(notVoidDispatchLabel, s);
 
-        //if not void continue as normal
-
-        //load dispatch table into T1
         CgenSupport.emitLoad(CgenSupport.T1, 2, CgenSupport.ACC, s);
-        //c1.printMethodOffsets();
-        //get offset in distpatch table to desired method and execute method
         CgenSupport.emitLoad(CgenSupport.T1, c1.getMethodOffset(name), CgenSupport.T1, s);
         CgenSupport.emitJalr(CgenSupport.T1, s);
 
@@ -846,12 +821,9 @@ class cond extends Expression {
         int ifFalseLabel = CgenNode.getLabelCountAndIncrement();
         int ifTrueLabel = CgenNode.getLabelCountAndIncrement();
         int ifEndLabel = CgenNode.getLabelCountAndIncrement();
-        //evaluate predicate
         pred.code(s, cgenTable);
         CgenSupport.emitLoadBool(CgenSupport.T1, BoolConst.truebool, s);
-        //branch on predicate value
         CgenSupport.emitBeq(CgenSupport.ACC, CgenSupport.T1, ifTrueLabel, s);
-        //if pred is false
         CgenSupport.emitLabelDef(ifFalseLabel, s);
         else_exp.code(s, cgenTable);
         CgenSupport.emitBranch(ifEndLabel, s);
@@ -906,24 +878,15 @@ class loop extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for loop");
-        //make two labels one for while loop and one for end of while loop
         int whileLabel = CgenNode.getLabelCountAndIncrement();
         int whileEndLabel = CgenNode.getLabelCountAndIncrement();
-        //while loop label definition
         CgenSupport.emitLabelDef(whileLabel, s);
-        //evaluate predicate
         pred.code(s, cgenTable);
-        //load true boolean const
         CgenSupport.emitLoadBool(CgenSupport.T1, BoolConst.truebool, s);
-        //check to see if predicate value is not equal to true
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.T1, whileEndLabel,s);
-        //CgenSupport.emitLabelDef(whileLabel, s);
-        //evaluate body
         body.code(s, cgenTable);
         CgenSupport.emitBranch(whileLabel,s);
-        //end of while loop label
         CgenSupport.emitLabelDef(whileEndLabel, s);
-        //CgenSupport.emitLoadImm(CgenSupport.ACC, 0, s);
         CgenSupport.emitComment(s, "Leaving cgen for loop");
 
     }
@@ -982,10 +945,8 @@ class typcase extends Expression {
 
         CgenSupport.emitComment(s, "Entering cgen for case");
 
-        //evaluate expression
         expr.code(s, cgenTable);
 
-        //handle dispatch on void
         int notVoidDispatchLabel = CgenNode.getLabelCountAndIncrement();
         CgenNode selfie = (CgenNode) cgenTable.lookup(TreeConstants.self);
         CgenSupport.emitBne(CgenSupport.ACC, CgenSupport.ZERO, notVoidDispatchLabel, s);
@@ -997,16 +958,12 @@ class typcase extends Expression {
         CgenNode c1 = (CgenNode) cgenTable.lookup(expr.get_type());
         int curr_tag = cgenTable.getTagId(c1.name);
 
-        //if not void continue as normal
         int caseBeginLabel = CgenNode.getLabelCountAndIncrement();
         int lubMatchLabel = CgenNode.getLabelCountAndIncrement();
         int noMatchLabel = CgenNode.getLabelCountAndIncrement();
 
-
-        //begin tag equal check chain of branches
         CgenSupport.emitLoadImm(CgenSupport.T1, curr_tag, s);
         CgenSupport.emitLabelDef(caseBeginLabel, s);
-        //Null means there was never any match
         CgenSupport.emitBeq(CgenSupport.T1, "-2", noMatchLabel, s);
         for(branch b : caseList){
             int next_branch_label = CgenNode.getLabelCountAndIncrement();
@@ -1017,17 +974,13 @@ class typcase extends Expression {
             CgenSupport.emitBranch(lubMatchLabel, s);
             CgenSupport.emitLabelDef(next_branch_label, s);
         }
-        //no match so use parent's tag and try again
         CgenSupport.emitLoadAddress(CgenSupport.T1, "class_parentTab", s);
-        //load parents tag and then try case matches again
         CgenSupport.emitLoad(CgenSupport.T1, curr_tag, CgenSupport.T1, s);
         CgenSupport.emitBranch(caseBeginLabel, s);
 
-        //we didn't match so we are done but gotta abort
         CgenSupport.emitLabelDef(noMatchLabel, s);
         CgenSupport.emitJal("_case_abort", s);
 
-        //we matched so we are done
         CgenSupport.emitLabelDef(lubMatchLabel, s);
 
         CgenSupport.emitComment(s, "leaving cgen for case");
@@ -1135,20 +1088,14 @@ class let extends Expression {
      * @param s the output stream 
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
-        //cgenTable.enterScope();
         CgenSupport.emitComment(s, "Entered cgen for let with identifier " + identifier);
 
-        // basically a let is like dispatching a function with one formal parameter
-        //Evaluate expression
         init.code(s, cgenTable);
-        //push value of expression to stack
         CgenSupport.emitPush(CgenSupport.ACC,s);
-        //frame offset to this let variable
         int offsetLet = CgenSupport.WORD_SIZE*2;
 
 
         CgenSupport.emitComment(s, "Leaving cgen for let with identifier " + identifier);
-        //cgenTable.exitScope();
     }
 
 }
@@ -1195,34 +1142,23 @@ class plus extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for addition");
-        // evaluate e1
         e1.code(s, cgenTable);
-        // push result onto the stack
         CgenSupport.emitPush(CgenSupport.ACC, s);
 
-        // cgen(e2)
         e2.code(s, cgenTable);
 
-        // create a new integer object that is a copy of current one
-        // (since $a0 currently contains an integer object)
         CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
 
-        // load result of evaluating e1
         CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
-
-        //remember these are int objects not ints so gotta get the ints themselves
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
         CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
 
 
-        // perform the arithmetic $a0 $t1 $a0
         CgenSupport.emitAdd(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
 
-        //store the sum in the new object
         CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
 
 
-        // addiu $sp $sp 4
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
         CgenSupport.emitComment(s, "Leaving cgen for addition");
     }
@@ -1272,33 +1208,24 @@ class sub extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for subtract");
-        // evaluate e1
         e1.code(s, cgenTable);
-        // push result onto the stack
         CgenSupport.emitPush(CgenSupport.ACC, s);
 
-        // cgen(e2)
         e2.code(s, cgenTable);
 
-        //create a new integer object that is a copy of current one (since $a0 currently contains an integer object)
         CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
 
-        // load result of evaluating e1
         CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
 
-        //remember these are int objects not ints so gotta get the ints themselves
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
         CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
 
 
-        // perform the arithmetic $a0 $t1 $a0
         CgenSupport.emitSub(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
 
-        //store the sum in the new object
         CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
 
 
-        // addiu $sp $sp 4
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
         CgenSupport.emitComment(s, "Leaving cgen for subtract");
     }
@@ -1348,33 +1275,22 @@ class mul extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for multiply");
-        // evaluate e1
         e1.code(s, cgenTable);
-        // push result onto the stack
         CgenSupport.emitPush(CgenSupport.ACC, s);
 
-        // cgen(e2)
         e2.code(s, cgenTable);
 
-        //create a new integer object that is a copy of current one (since $a0 currently contains an integer object)
         CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
 
-        // load result of evaluating e1
         CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
 
-        //remember these are int objects not ints so gotta get the ints themselves
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
         CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
 
-
-        // perform the arithmetic $a0 $t1 $a0
         CgenSupport.emitMul(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
 
-        //store the sum in the new object
         CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
 
-
-        // addiu $sp $sp 4
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
         CgenSupport.emitComment(s, "Leaving cgen for multiply");
 
@@ -1425,33 +1341,24 @@ class divide extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for divide");
-        // evaluate e1
         e1.code(s, cgenTable);
-        // push result onto the stack
         CgenSupport.emitPush(CgenSupport.ACC, s);
 
-        // cgen(e2)
         e2.code(s, cgenTable);
 
-        //create a new integer object that is a copy of current one (since $a0 currently contains an integer object)
         CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
 
-        // load result of evaluating e1
         CgenSupport.emitLoad(CgenSupport.T1, 1, CgenSupport.SP, s);
 
-        //remember these are int objects not ints so gotta get the ints themselves
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
         CgenSupport.emitLoad(CgenSupport.T2, 3, CgenSupport.ACC, s);
 
 
-        // perform the arithmetic $a0 $t1 $a0
         CgenSupport.emitDiv(CgenSupport.T1, CgenSupport.T1, CgenSupport.T2, s);
 
-        //store the sum in the new object
         CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
 
 
-        // addiu $sp $sp 4
         CgenSupport.emitAddiu(CgenSupport.SP, CgenSupport.SP, 4, s);
         CgenSupport.emitComment(s, "Leaving cgen for divide");
     }
@@ -1496,19 +1403,14 @@ class neg extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entering cgen for negate");
-        // evaluate e1
         e1.code(s, cgenTable);
 
-        //create a new integer object that is a copy of current one (since $a0 currently contains an integer object)
         CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
 
-        //remember these is an int object so gotta get the int itself
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.ACC, s);
 
-        // perform the arithmetic $a0 $t1 $a0
         CgenSupport.emitNeg(CgenSupport.T1, CgenSupport.T1, s);
 
-        //store the negation in the new object
         CgenSupport.emitStore(CgenSupport.T1, 3, CgenSupport.ACC, s);
 
         CgenSupport.emitComment(s, "Leaving cgen for negate");
@@ -1559,24 +1461,17 @@ class lt extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entering cgen for less than");
-        //Generate code for first expression
         e1.code(s, cgenTable);
-        //Move it to a temp
         CgenSupport.emitMove(CgenSupport.T1, CgenSupport.ACC, s);
-        //Generate Code for second expression
         e2.code(s, cgenTable);
 
-        //check if $t1 < $a0 is true or false
         int labelCountTrue = CgenNode.getLabelCountAndIncrement();
         int labelCountFalse = CgenNode.getLabelCountAndIncrement();
         int labelCountEnd = CgenNode.getLabelCountAndIncrement();
-        //remember these are int objects, so load their actual values
 
-        //remember these is an int objects so gotta get the ints themselves
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
         CgenSupport.emitLoad(CgenSupport.ACC, 3, CgenSupport.ACC, s);
 
-        //If e1 < e2 return true boolean constant else return false boolean constant
         CgenSupport.emitBlt(CgenSupport.T1, CgenSupport.ACC, labelCountTrue, s);
         CgenSupport.emitLabelDef(labelCountFalse, s);
         CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.falsebool,s);
@@ -1640,13 +1535,10 @@ class eq extends Expression {
         e2.code(s, cgenTable);
         CgenSupport.emitMove(CgenSupport.T2, CgenSupport.ACC, s);
 
-        // first see if pointers are equal (= same object)
-//        CgenSupport.emitBeq(CgenSupport.T1, CgenSupport.T2, CgenSupport.emitLabelRef(equalLabel, s), s);
 
         CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.truebool, s);
         CgenSupport.emitLoadBool(CgenSupport.A1, BoolConst.falsebool, s);
 
-        //This functions returns what's in a0 if objects in t1 and t2 are same type and equal, else it returns whats in a1
         CgenSupport.emitJal("equality_test", s);
 
         CgenSupport.emitLabelDef(equalLabel, s);
@@ -1699,24 +1591,17 @@ class leq extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entering cgen for less than or equal to");
-        //Generate code for first expression
         e1.code(s, cgenTable);
-        //Move it to a temp
         CgenSupport.emitMove(CgenSupport.T1, CgenSupport.ACC, s);
-        //Generate Code for second expression
         e2.code(s, cgenTable);
 
-        //check if $t1 < $a0 is true or false
         int labelCountTrue = CgenNode.getLabelCountAndIncrement();
         int labelCountFalse = CgenNode.getLabelCountAndIncrement();
         int labelCountEnd = CgenNode.getLabelCountAndIncrement();
-        //remember these are int objects, so load their actual values
 
-        //remember these is an int objects so gotta get the ints themselves
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.T1, s);
         CgenSupport.emitLoad(CgenSupport.ACC, 3, CgenSupport.ACC, s);
 
-        //If e1 <= e2 return true boolean constant else return false boolean constant
         CgenSupport.emitBleq(CgenSupport.T1, CgenSupport.ACC, labelCountTrue, s);
         CgenSupport.emitLabelDef(labelCountFalse, s);
         CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.falsebool,s);
@@ -1766,27 +1651,16 @@ class comp extends Expression {
      * @param s the output stream 
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
-        /*
-        comp.expr->accept(*this);
-        emit_lw("t1", 12, "a0");
-        emit_not("t1", "t1");
-        emit_sw("t1", 12, "a0");
-         */
 
         CgenSupport.emitComment(s, "Entered cgen for not");
         e1.code(s, cgenTable);
-        //Get the value of the boolean
         CgenSupport.emitLoad(CgenSupport.T1, 3, CgenSupport.ACC, s);
-        //compare with true
         CgenSupport.emitLoadImm(CgenSupport.T2, 1, s);
 
-        //check if $t1 < $a0 is true or false
         int labelCountTrue = CgenNode.getLabelCountAndIncrement();
         int labelCountFalse = CgenNode.getLabelCountAndIncrement();
         int labelCountEnd = CgenNode.getLabelCountAndIncrement();
-        //remember these are int objects, so load their actual values
 
-        //If e1 <= e2 return true boolean constant else return false boolean constant
         CgenSupport.emitBeq(CgenSupport.T1, CgenSupport.T2, labelCountTrue, s);
         CgenSupport.emitLabelDef(labelCountFalse, s);
         CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.truebool, s);
@@ -1969,11 +1843,11 @@ class new_ extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for new");
-        //load address of prototype definition
+
         CgenSupport.emitLoadAddress(CgenSupport.ACC, this.type_name.toString()+"_protObj", s);
-        //use function Object.copy to create new object using prototype definition
+
         CgenSupport.emitJal(CgenSupport.OBJECT_DOT_COPY, s);
-        //initialize new object using object's init function
+
         CgenSupport.emitJal(this.type_name.toString()+"_init", s);
         CgenSupport.emitComment(s, "Leaving cgen for new");
     }
@@ -2018,12 +1892,12 @@ class isvoid extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for isvoid");
-        //generate code for expression
+
         e1.code(s, cgenTable);
-        //check if object in $a0 is null/void ($a0 = 0)
+
         int labelCountTrue = CgenNode.getLabelCountAndIncrement();
         int labelCountFalse = CgenNode.getLabelCountAndIncrement();
-        //If a0 contains 0 that means null object so returns true boolean constant else return false boolean constant
+
         CgenSupport.emitBeq(CgenSupport.ACC,"0", labelCountTrue, s);
         CgenSupport.emitLabelDef(labelCountFalse, s);
         CgenSupport.emitLoadBool(CgenSupport.ACC, BoolConst.falsebool,s);
@@ -2066,7 +1940,7 @@ class no_expr extends Expression {
      * @param s the output stream 
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
-        //no expressions means generate no code right so this should be blank I think
+
         CgenSupport.emitComment(s, "Entered and exited cgen for no expression");
         CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.ZERO, s);
     }
@@ -2111,23 +1985,16 @@ class object extends Expression {
      * */
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for object: "+name);
-        //CgenSupport.emitPush(CgenSupport.ACC, s);
-        //First check to see if this is a self object, if so, then copy s0 to a0, easy peasy!
+
         if(this.name.equals(TreeConstants.self)){
             CgenSupport.emitMove(CgenSupport.ACC,CgenSupport.SELF, s);
         }else {
-            //it's not a self object so could be an attribute of the class or in scope (like a let variable for example)
-            //First check if this variable is in current scope
             if(cgenTable.probe(this.name) == null) {
-                //not in current scope so it must be an attribute, so get offset of attribute
-                // and load into current scope
                 Object lookUpSelf = cgenTable.lookup(TreeConstants.self);
                 CgenNode nd = (CgenNode) lookUpSelf;
-                //CgenNode nd = (CgenNode) cgenTable.lookup(TreeConstants.self);
                 int attrOffset = CgenNode.attrOffsetMap.get(nd.name).get(name);
                 CgenSupport.emitLoad(CgenSupport.ACC, (2+attrOffset), CgenSupport.SELF, s);// check if 2 or 3
             } else {
-                //is in the current scope, so get offset in frame and load into $a0
                 int frameOffset = (Integer) cgenTable.probe(name) + 1;
                 CgenSupport.emitLoad(CgenSupport.ACC, frameOffset, CgenSupport.FP, s);
             }
