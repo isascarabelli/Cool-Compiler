@@ -579,7 +579,7 @@ labelCountEnd: Marca o final da operação.
 
 - Classe `int_const`
 
-Já esse método implementa a geração de código para uma constante inteira em uma linguagem de compilador orientado a objetos. O objetivo é carregar uma constante inteira previamente definida (como 5 ou 42) no registrador acumulador ($ACC).
+Já esse método implementa a geração de código para uma constante inteira em cool. O objetivo é carregar uma constante inteira previamente definida (como 5 ou 42) no registrador acumulador ($ACC).
 
 ```
 public void code(PrintStream s, CgenClassTable cgenTable) {
@@ -594,7 +594,7 @@ Seu fluxo consiste basicamente na busca na Tabela de Símbolos, localizando o s�
 
 - Classe `bool_const`
 
-Nesse método é implementado a geração de código para uma constante booleana (true ou false) em uma linguagem de compilador orientado a objetos. O objetivo é carregar o valor booleano especificado no registrador acumulador ($ACC).
+Nesse método é implementado a geração de código para uma constante booleana (true ou false) para cool. O objetivo é carregar o valor booleano especificado no registrador acumulador ($ACC).
 
 ```
 public void code(PrintStream s, CgenClassTable cgenTable) {
@@ -608,6 +608,7 @@ Ele instancia um objeto BoolConst com base no valor de val, carrega o objeto boo
 
 - Classe `string_const`
 
+Aqui foi implementado a geração de código para uma constante de string em cool. O objetivo é localizar ou criar um objeto representando a string na tabela de símbolos de strings (stringtable) e carregá-lo no registrador acumulador ($ACC).
 ```
     public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for string const expression");
@@ -616,6 +617,8 @@ Ele instancia um objeto BoolConst com base no valor de val, carrega o objeto boo
         CgenSupport.emitComment(s, "Leaving cgen for string const expression");
     }
 ```
+
+O que foi feito foi a adição de comentários para indicar que o código gerado é para uma expressão constante de string, a busca da string literal na tabela de símbolos de strings usando o valor fornecido por token.getString() e a carga do objeto associado à string no registrador acumulador ($ACC).
 
 - Classe `new_`
 
@@ -631,6 +634,8 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
 
 - Classe `isvoid`
 
+O `isvoid` implementa a geração de código para a criação de um novo objeto em cool. A instrução new cria uma nova instância de uma classe, inicializa seus atributos e retorna o objeto no registrador acumulador ($ACC).
+
 ```
 public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Entered cgen for new");
@@ -641,7 +646,11 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
     }
 ```
 
+Seu caminho para geração se dá quando o método localiza o protótipo do objeto (_protObj) correspondente à classe type_name, usa OBJECT_DOT_COPY para criar uma nova instância com a estrutura básica do protótipo, chama o método _init da classe para configurar os atributos do objeto e o objeto inicializado é armazenado no acumulador ($ACC).
+
 - Classe `no_expr`
+
+Já o método `no_expr` implementa a geração de código para uma expressão vazia ou "sem expressão" para a linguagem cool. O objetivo é lidar com casos onde uma expressão válida não é fornecida, garantindo que o programa tenha um comportamento consistente e sem erros.
 
 ```
 public void code(PrintStream s, CgenClassTable cgenTable) {
@@ -649,8 +658,12 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitMove(CgenSupport.ACC, CgenSupport.ZERO, s);
     }
 ```
+O método indica que uma expressão "vazia" foi processada e armazena 0 no acumulador ($ACC) para indicar a ausência de um valor.
+O valor 0 no acumulador ($ACC) garante que o programa tenha um estado consistente, mesmo na ausência de uma expressão válida. O método é direto e eficiente, projetado para lidar com casos onde uma expressão é omitida e pode ser usado em vários contextos onde uma "não expressão" pode aparecer, como em blocos ou declarações de inicialização.
 
 - Classe `object`
+- 
+Este método implementa a geração de código para o acesso a um objeto identificado por name, seja ele o próprio objeto self, um atributo da classe atual, ou uma variável local em um contexto de execução. Ele decide onde o objeto está localizado e gera o código necessário para carregá-lo no registrador acumulador ($ACC). Caso o objeto não seja self, o código verifica onde ele está armazenado.
 
 ```
 public void code(PrintStream s, CgenClassTable cgenTable) {
@@ -671,5 +684,6 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
         CgenSupport.emitComment(s, "Exited cgen for object");
     }
 ```
+Para o fluxo desse método code, o primeiro passo é verificar se o objeto é `self`. Se o objeto for self, carrega o registrador SELF no acumulador ($ACC) caso não seja self, calcula o deslocamento do atributo na tabela de atributos e carrega seu valor. Se for uma variável local, calcula o deslocamento na pilha e carrega seu valor. Por fim, adiciona comentários indicando o início e o fim da operação.
 
 ## Testes
