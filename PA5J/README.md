@@ -54,7 +54,7 @@ Essa classe possui vários métodos, mas podemos separá-los nas seguintes etapa
     * Gera o código para inicializadores e métodos.
 
  
-Descrevendo alguns dos princpais métodos:
+Descrevendo alguns dos principais métodos:
 - installBasicClasses(): cria as classes básicas necessárias para a execução de qualquer programa Cool.
     Classes instaladas:
         Object: Classe raiz de todas as classes.
