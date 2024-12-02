@@ -552,21 +552,21 @@ Essa classe é projetada para emitir instruções de assembly para um compilador
 
 * Configurações gerais:
   
-         ```
-             final static int MAXINT = 100000000;
-             final static int WORD_SIZE = 4;
-         ```
+  ```
+     final static int MAXINT = 100000000;
+     final static int WORD_SIZE = 4;
+  ```
 
 * Nomes globais para tabelas: Define nomes padrão para tabelas globais usadas no código gerado.
   
-        ```
-            final static String CLASSNAMETAB = "class_nameTab";
-        ```
+  ```
+      final static String CLASSNAMETAB = "class_nameTab";
+  ```
 * Offset e tamanhos de objetos: Define que os objetos têm, no mínimo, 3 campos no cabeçalho (tag, tamanho e tabela de métodos).
   
-        ```
-            final static int DEFAULT_OBJFIELDS = 3;
-        ```
+ ```
+    final static int DEFAULT_OBJFIELDS = 3;
+ ```
 
 2 - Convenções de registradores: 
 
@@ -598,11 +598,11 @@ Esses métodos geram instruções de assembly específicas. Exemplos:
 
 * emitLoad e emitStore: Manipulam dados na memória.
   
-         ```
+ ```
             static void emitLoad(String dest_reg, int offset, String source_reg, PrintStream s) {
                 s.println(LW + dest_reg + " " + offset * WORD_SIZE + "(" + source_reg + ")");
             }
-         ```
+ ```
 * Gera uma instrução lw (load word) para carregar um valor da memória para um registrador.
 * Calcula o endereço com base no offset e no WORD_SIZE.
      
@@ -610,11 +610,11 @@ Similarmente, emitStore escreve valores de registradores na memória.
 
 * emitAdd, emitSub: Operações aritméticas.
   
-        ```
+  ```
             static void emitAdd(String dest_reg, String src1, String src2, PrintStream s) {
                 s.println(ADD + dest_reg + " " + src1 + " " + src2);
             }
-        ``` 
+   ``` 
 
 Gera instruções para somar, subtrair, multiplicar, etc.
 
@@ -660,14 +660,14 @@ O código suporta chamadas ao coletor de lixo:
 
 * emitTestCollector: Testa o GC.
   
-        ```
+  ```
             static void emitTestCollector(PrintStream s) {
                 emitPush(ACC, s);
                 emitMove(ACC, SP, s);
                 s.println(JAL + gcCollectNames[Flags.cgen_Memmgr]);
                 emitAddiu(SP, SP, 4, s);
             }
-        ```
+   ```
 
 Essa sequência salva valores no topo da pilha e chama o GC.
 
