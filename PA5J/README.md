@@ -63,10 +63,230 @@ Descrevendo alguns dos principais métodos:
         Bool: Classe para valores booleanos, com o atributo val.
         String: Classe para strings, com os atributos val (tamanho) e str_field (conteúdo).
             Métodos: length, concat, substr.
+```
+ private void installBasicClasses() {
+        AbstractSymbol filename 
+            = AbstractTable.stringtable.addString("<basic class>");
+
+        // A few special class names are installed in the lookup table
+        // but not the class list.  Thus, these classes exist, but are
+        // not part of the inheritance hierarchy.  No_class serves as
+        // the parent of Object and the other special classes.
+        // SELF_TYPE is the self class; it cannot be redefined or
+        // inherited.  prim_slot is a class known to the code generator.
+
+        addId(TreeConstants.No_class,
+                new CgenNode(new class_c(0,
+                        TreeConstants.No_class,
+                        TreeConstants.No_class,
+                        new Features(0),
+                        filename),
+                    CgenNode.Basic, this));
+
+        addId(TreeConstants.SELF_TYPE,
+                new CgenNode(new class_c(0,
+                        TreeConstants.SELF_TYPE,
+                        TreeConstants.No_class,
+                        new Features(0),
+                        filename),
+                    CgenNode.Basic, this));
+
+        addId(TreeConstants.prim_slot,
+                new CgenNode(new class_c(0,
+                        TreeConstants.prim_slot,
+                        TreeConstants.No_class,
+                        new Features(0),
+                        filename),
+                    CgenNode.Basic, this));
+
+        // The Object class has no parent class. Its methods are
+        //        cool_abort() : Object    aborts the program
+        //        type_name() : Str        returns a string representation 
+        //                                 of class name
+        //        copy() : SELF_TYPE       returns a copy of the object
+
+        class_c Object_class = 
+            new class_c(0, 
+                    TreeConstants.Object_, 
+                    TreeConstants.No_class,
+                    new Features(0)
+                    .appendElement(new method(0, 
+                            TreeConstants.cool_abort, 
+                            new Formals(0), 
+                            TreeConstants.Object_, 
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                            TreeConstants.type_name,
+                            new Formals(0),
+                            TreeConstants.Str,
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                            TreeConstants.copy,
+                            new Formals(0),
+                            TreeConstants.SELF_TYPE,
+                            new no_expr(0))),
+                    filename);
+
+        installClass(new CgenNode(Object_class, CgenNode.Basic, this));
+
+        // The IO class inherits from Object. Its methods are
+        //        out_string(Str) : SELF_TYPE  writes a string to the output
+        //        out_int(Int) : SELF_TYPE      "    an int    "  "     "
+        //        in_string() : Str            reads a string from the input
+        //        in_int() : Int                "   an int     "  "     "
+
+        class_c IO_class = 
+            new class_c(0,
+                    TreeConstants.IO,
+                    TreeConstants.Object_,
+                    new Features(0)
+                    .appendElement(new method(0,
+                            TreeConstants.out_string,
+                            new Formals(0)
+                            .appendElement(new formalc(0,
+                                    TreeConstants.arg,
+                                    TreeConstants.Str)),
+                            TreeConstants.SELF_TYPE,
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                            TreeConstants.out_int,
+                            new Formals(0)
+                            .appendElement(new formalc(0,
+                                    TreeConstants.arg,
+                                    TreeConstants.Int)),
+                            TreeConstants.SELF_TYPE,
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                            TreeConstants.in_string,
+                            new Formals(0),
+                            TreeConstants.Str,
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                                TreeConstants.in_int,
+                                new Formals(0),
+                                TreeConstants.Int,
+                                new no_expr(0))),
+            filename);
+
+        CgenNode IO_node = new CgenNode(IO_class, CgenNode.Basic, this);
+        installClass(IO_node);
+
+        // The Int class has no methods and only a single attribute, the
+        // "val" for the integer.
+
+        class_c Int_class = 
+            new class_c(0,
+                    TreeConstants.Int,
+                    TreeConstants.Object_,
+                    new Features(0)
+                    .appendElement(new attr(0,
+                            TreeConstants.val,
+                            TreeConstants.prim_slot,
+                            new no_expr(0))),
+                    filename);
+
+        installClass(new CgenNode(Int_class, CgenNode.Basic, this));
+
+        // Bool also has only the "val" slot.
+        class_c Bool_class = 
+            new class_c(0,
+                    TreeConstants.Bool,
+                    TreeConstants.Object_,
+                    new Features(0)
+                    .appendElement(new attr(0,
+                            TreeConstants.val,
+                            TreeConstants.prim_slot,
+                            new no_expr(0))),
+                    filename);
+
+        installClass(new CgenNode(Bool_class, CgenNode.Basic, this));
+
+        // The class Str has a number of slots and operations:
+        //       val                              the length of the string
+        //       str_field                        the string itself
+        //       length() : Int                   returns length of the string
+        //       concat(arg: Str) : Str           performs string concatenation
+        //       substr(arg: Int, arg2: Int): Str substring selection
+
+        class_c Str_class =
+            new class_c(0,
+                    TreeConstants.Str,
+                    TreeConstants.Object_,
+                    new Features(0)
+                    .appendElement(new attr(0,
+                            TreeConstants.val,
+                            TreeConstants.Int,
+                            new no_expr(0)))
+                    .appendElement(new attr(0,
+                            TreeConstants.str_field,
+                            TreeConstants.prim_slot,
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                            TreeConstants.length,
+                            new Formals(0),
+                            TreeConstants.Int,
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                            TreeConstants.concat,
+                            new Formals(0)
+                            .appendElement(new formalc(0,
+                                    TreeConstants.arg, 
+                                    TreeConstants.Str)),
+                            TreeConstants.Str,
+                            new no_expr(0)))
+                    .appendElement(new method(0,
+                                TreeConstants.substr,
+                                new Formals(0)
+                                .appendElement(new formalc(0,
+                                        TreeConstants.arg,
+                                        TreeConstants.Int))
+                                .appendElement(new formalc(0,
+                                        TreeConstants.arg2,
+                                        TreeConstants.Int)),
+                                TreeConstants.Str,
+                                new no_expr(0))),
+            filename);
+
+        installClass(new CgenNode(Str_class, CgenNode.Basic, this));
+    }
+  ```
 - installClass(CgenNode nd): adiciona um nó de classe (CgenNode) à tabela de classes. Verifica se a classe já existe na tabela (probe(name)). Se não existir, adiciona o nó ao vetor nds e ao escopo atual.
+```
+private void installClass(CgenNode nd) {
+        AbstractSymbol name = nd.getName();
+        if (probe(name) != null) return;
+        nds.addElement(nd);
+        addId(name, nd);
+}
+```
+
 - installClasses(Classes cs): adiciona classes definidas pelo usuário à tabela de classes. Itera sobre as classes fornecidas em cs e chama installClass para cada uma delas.
+```
+ private void installClasses(Classes cs) {
+        for (Enumeration e = cs.getElements(); e.hasMoreElements(); ) {
+            installClass(new CgenNode((Class_)e.nextElement(), 
+                        CgenNode.NotBasic, this));
+        }
+    }
+```
 - buildInheritanceTree(): constrói a árvore de herança relacionando classes pais e filhos. Itera sobre todos os nós em nds e chama setRelations para configurar as relações de herança.
+```
+private void buildInheritanceTree() {
+        for (Enumeration e = nds.elements(); e.hasMoreElements(); ) {
+            setRelations((CgenNode)e.nextElement());
+        }
+    }
+```
+
 - setRelations(CgenNode nd): configura as relações de herança de um nó de classe. Obtém a classe pai usando probe(nd.getParent()). Configura o pai do nó atual e adiciona o nó atual como filho do pai.
+```
+private void setRelations(CgenNode nd) {
+        CgenNode parent = (CgenNode)probe(nd.getParent());
+        nd.setParentNd(parent);
+        parent.addChild(nd);
+    }
+
+```
 - code(): método principal para gerar o código assembly do programa.
     Etapas:
         Mapeamento de tags: Atribui tags únicos às classes em nds.
@@ -81,13 +301,188 @@ Descrevendo alguns dos principais métodos:
         Gera protótipos de objetos.
         Gera código de inicialização de objetos (codeObjInit).
         Gera métodos das classes.
-- codeGlobalData(): emite código para a seção .data (segmento de dados) e declara nomes globais.
-- codeGlobalText(): emite código para a seção .text (segmento de texto) e inicializações globais.
-- codeConstants(): gera código para constantes de string, inteiros e booleanos. Adiciona constantes necessárias ao programa (ex.: "" e 0). Gera tabelas de constantes para String e Int.
-- codeBools(int classtag): gera código para os valores booleanos (true e false).
-- codeSelectGc(): gera código para configurar o coletor de lixo, dependendo das flags do compilador.
-- root(): retorna a classe raiz (Object) da árvore de herança.
 
+```
+ public void code() {
+        //classTagMap = new HashMap<AbstractSymbol, Integer>();
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            CgenNode tmpNode = (CgenNode) en.nextElement();
+            classTagMap.put(tmpNode.name, tmpNode.getTag());
+        }
+
+        if (Flags.cgen_debug) System.out.println("coding global data");
+        codeGlobalData();
+
+        if (Flags.cgen_debug) System.out.println("choosing gc");
+        codeSelectGc();
+
+        if (Flags.cgen_debug) System.out.println("coding constants");
+        codeConstants();
+
+        //                 Add your code to emit
+        //                   - class_nameTab
+        str.print(CgenSupport.CLASSNAMETAB + CgenSupport.LABEL);
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            ((CgenNode) en.nextElement()).codeNameTab(str);
+        }
+        //  class ObjectTable
+        str.print(CgenSupport.CLASSOBJTAB + CgenSupport.LABEL);
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            ((CgenNode) en.nextElement()).codeClassObjTab(str);
+        }
+        // parentTab
+        str.println("class_parentTab:");
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            ((CgenNode) en.nextElement()).codeParentTables(str);
+        }
+
+        // attrTabTab
+        str.println("class_attrTabTab:");
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            ((CgenNode) en.nextElement()).codeAttrTableTables(str);
+        }
+
+        // Class attrTab
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            ((CgenNode) en.nextElement()).codeAttrTables(str);
+        }
+        //                   - dispatch tables
+        root().buildDispatchTables(str, new LinkedList<AbstractSymbol>(), new HashMap<AbstractSymbol, AbstractSymbol>());
+        //                   - prototype objects
+        //for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+        //    ((CgenNode) en.nextElement()).codeProtObj(str);
+        //}
+        root().codeObjProt(str);
+        
+
+        if (Flags.cgen_debug) System.out.println("coding global text");
+        codeGlobalText();
+
+        //                 Add your code to emit
+        //                   - object initializer
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            CgenNode tmp = (CgenNode) en.nextElement();
+            this.addId(TreeConstants.self, tmp);
+            tmp.codeObjInit(str);
+        }
+        //                   - the class methods
+        for( Enumeration en = nds.elements(); en.hasMoreElements() ; ) {
+            CgenNode tmp = (CgenNode) en.nextElement();
+            this.addId(TreeConstants.self, tmp);
+            tmp.codeClassMethods(str);
+        }
+        //                   - etc...
+    }
+```
+- codeGlobalData(): emite código para a seção .data (segmento de dados) e declara nomes globais.
+```
+private void codeGlobalData() {
+        // The following global names must be defined first.
+
+        str.print("\t.data\n" + CgenSupport.ALIGN);
+        str.println(CgenSupport.GLOBAL + CgenSupport.CLASSNAMETAB);
+        str.print(CgenSupport.GLOBAL); 
+        CgenSupport.emitProtObjRef(TreeConstants.Main, str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL); 
+        CgenSupport.emitProtObjRef(TreeConstants.Int, str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL); 
+        CgenSupport.emitProtObjRef(TreeConstants.Str, str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL); 
+        BoolConst.falsebool.codeRef(str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL); 
+        BoolConst.truebool.codeRef(str);
+        str.println("");
+        str.println(CgenSupport.GLOBAL + CgenSupport.INTTAG);
+        str.println(CgenSupport.GLOBAL + CgenSupport.BOOLTAG);
+        str.println(CgenSupport.GLOBAL + CgenSupport.STRINGTAG);
+
+        // We also need to know the tag of the Int, String, and Bool classes
+        // during code generation.
+
+        str.println(CgenSupport.INTTAG + CgenSupport.LABEL 
+                + CgenSupport.WORD + intclasstag);
+        str.println(CgenSupport.BOOLTAG + CgenSupport.LABEL 
+                + CgenSupport.WORD + boolclasstag);
+        str.println(CgenSupport.STRINGTAG + CgenSupport.LABEL 
+                + CgenSupport.WORD + stringclasstag);
+
+    }
+```
+- codeGlobalText(): emite código para a seção .text (segmento de texto) e inicializações globais.
+```
+private void codeGlobalText() {
+        str.println(CgenSupport.GLOBAL + CgenSupport.HEAP_START);
+        str.print(CgenSupport.HEAP_START + CgenSupport.LABEL);
+        str.println(CgenSupport.WORD + 0);
+        str.println("\t.text");
+        str.print(CgenSupport.GLOBAL);
+        CgenSupport.emitInitRef(TreeConstants.Main, str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL);
+        CgenSupport.emitInitRef(TreeConstants.Int, str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL);
+        CgenSupport.emitInitRef(TreeConstants.Str, str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL);
+        CgenSupport.emitInitRef(TreeConstants.Bool, str);
+        str.println("");
+        str.print(CgenSupport.GLOBAL);
+        CgenSupport.emitMethodRef(TreeConstants.Main, TreeConstants.main_meth, str);
+        str.println("");
+    }
+
+```
+- codeConstants(): gera código para constantes de string, inteiros e booleanos. Adiciona constantes necessárias ao programa (ex.: "" e 0). Gera tabelas de constantes para String e Int.
+```
+ private void codeConstants() {
+        // Add constants that are required by the code generator.
+        AbstractTable.stringtable.addString("");
+        AbstractTable.inttable.addString("0");
+
+        AbstractTable.stringtable.codeStringTable(stringclasstag, str);
+        AbstractTable.inttable.codeStringTable(intclasstag, str);
+        codeBools(boolclasstag);
+
+        //create
+    }
+```
+- codeBools(int classtag): gera código para os valores booleanos (true e false).
+```
+ private void codeBools(int classtag) {
+        BoolConst.falsebool.codeDef(classtag, str);
+        BoolConst.truebool.codeDef(classtag, str);
+    }
+```
+- codeSelectGc(): gera código para configurar o coletor de lixo, dependendo das flags do compilador.
+```
+ private void codeSelectGc() {
+        str.println(CgenSupport.GLOBAL + "_MemMgr_INITIALIZER");
+        str.println("_MemMgr_INITIALIZER:");
+        str.println(CgenSupport.WORD 
+                + CgenSupport.gcInitNames[Flags.cgen_Memmgr]);
+
+        str.println(CgenSupport.GLOBAL + "_MemMgr_COLLECTOR");
+        str.println("_MemMgr_COLLECTOR:");
+        str.println(CgenSupport.WORD 
+                + CgenSupport.gcCollectNames[Flags.cgen_Memmgr]);
+
+        str.println(CgenSupport.GLOBAL + "_MemMgr_TEST");
+        str.println("_MemMgr_TEST:");
+        str.println(CgenSupport.WORD 
+                + ((Flags.cgen_Memmgr_Test == Flags.GC_TEST) ? "1" : "0"));
+    }
+```
+- root(): retorna a classe raiz (Object) da árvore de herança.
+```
+public CgenNode root() {
+        return (CgenNode)probe(TreeConstants.Object_);
+    }
+```
 
 Resumindo, o compilador lê o programa Cool e cria um conjunto de classes. A CgenClassTable vai então instalar as classes básicas e as classes do programa, construir a árvore de herança e gerar as tabelas e o código assembly para inicialização e execução. 
 
