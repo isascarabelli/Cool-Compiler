@@ -544,22 +544,26 @@ Essa classe é projetada para emitir instruções de assembly para um compilador
 1 - Constantes:
 
 * Controle de Garbage Collector (GC): Essas strings representam nomes de funções relacionadas ao controle do GC no código gerado.
+  
     ```
         final static String[] gcInitNames = {"_NoGC_Init", "_GenGC_Init", "_ScnGC_Init"};
         final static String[] gcCollectNames = {"_NoGC_Collect", "_GenGC_Collect", "_ScnGC_Collect"};
     ```
 
-* Configurações gerais: 
+* Configurações gerais:
+  
          ```
              final static int MAXINT = 100000000;
              final static int WORD_SIZE = 4;
          ```
 
 * Nomes globais para tabelas: Define nomes padrão para tabelas globais usadas no código gerado.
+  
         ```
             final static String CLASSNAMETAB = "class_nameTab";
         ```
 * Offset e tamanhos de objetos: Define que os objetos têm, no mínimo, 3 campos no cabeçalho (tag, tamanho e tabela de métodos).
+  
         ```
             final static int DEFAULT_OBJFIELDS = 3;
         ```
@@ -568,12 +572,12 @@ Essa classe é projetada para emitir instruções de assembly para um compilador
 
 O código segue as convenções de registradores de MIPS:
 
-    ```
+   ```
         final static String ZERO = "$zero";  // Registrador sempre com valor zero.
         final static String ACC = "$a0";    // Acumulador.
         final static String SP = "$sp";     // Ponteiro de pilha.
         final static String RA = "$ra";     // Endereço de retorno.
-    ```
+   ```
 
 Essas constantes permitem que o código de geração de assembly use nomes amigáveis em vez de valores diretos.
 
@@ -593,6 +597,7 @@ O código usa strings constantes para representar instruções de assembly, como
 Esses métodos geram instruções de assembly específicas. Exemplos:
 
 * emitLoad e emitStore: Manipulam dados na memória.
+  
          ```
             static void emitLoad(String dest_reg, int offset, String source_reg, PrintStream s) {
                 s.println(LW + dest_reg + " " + offset * WORD_SIZE + "(" + source_reg + ")");
@@ -604,6 +609,7 @@ Esses métodos geram instruções de assembly específicas. Exemplos:
 Similarmente, emitStore escreve valores de registradores na memória.
 
 * emitAdd, emitSub: Operações aritméticas.
+  
         ```
             static void emitAdd(String dest_reg, String src1, String src2, PrintStream s) {
                 s.println(ADD + dest_reg + " " + src1 + " " + src2);
@@ -613,6 +619,7 @@ Similarmente, emitStore escreve valores de registradores na memória.
 Gera instruções para somar, subtrair, multiplicar, etc.
 
 * emitBranch: Gera instruções de desvio condicional ou incondicional.
+  
     ```
         static void emitBranch(int label, PrintStream s) {
             s.print(BRANCH);
@@ -626,6 +633,7 @@ Gera instruções para somar, subtrair, multiplicar, etc.
 Os métodos permitem carregar constantes específicas:
 
 * Carregar inteiros:
+  
     ```
         static void emitLoadImm(String dest_reg, int val, PrintStream s) {
             s.println(LI + dest_reg + " " + val);
@@ -635,6 +643,7 @@ Os métodos permitem carregar constantes específicas:
 Gera uma instrução li para carregar um valor imediato no registrador.
 
 * Carregar strings ou booleanos:
+  
     ```
         static void emitLoadString(String dest_reg, StringSymbol str, PrintStream s) {
             emitPartialLoadAddress(dest_reg, s);
@@ -650,6 +659,7 @@ Combina carregamento de endereço com referência ao objeto.
 O código suporta chamadas ao coletor de lixo:
 
 * emitTestCollector: Testa o GC.
+  
         ```
             static void emitTestCollector(PrintStream s) {
                 emitPush(ACC, s);
@@ -664,6 +674,7 @@ Essa sequência salva valores no topo da pilha e chama o GC.
 7 - Emissão de comentários e strings:
 
 * Comentários:
+  
     ```
         static void emitComment(PrintStream s, String str) {
             s.println("\t\t\t\t#" + str);
@@ -673,6 +684,7 @@ Essa sequência salva valores no topo da pilha e chama o GC.
 Insere comentários no código assembly.
 
 * Strings no formato ASCII:
+  
     ```
         static void emitStringConstant(String str, PrintStream s) {
             for (int i = 0; i < str.length(); i++) {
