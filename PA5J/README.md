@@ -55,7 +55,8 @@ Essa classe possui vários métodos, mas podemos separá-los nas seguintes etapa
 Descrevendo alguns dos principais métodos:
 - installBasicClasses(): cria as classes básicas necessárias para a execução de qualquer programa Cool.
   
-    Classes instaladas:
+    * Classes instaladas:
+      
         * Object: Classe raiz de todas as classes - Métodos: cool_abort (encerra o programa), type_name (retorna o nome da classe), copy (faz uma cópia do objeto).
         * IO: Subclasse de Object para entrada e saída - Métodos: out_string, out_int, in_string, in_int.
         * Int: Classe para inteiros, com o atributo val.
