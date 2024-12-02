@@ -7,6 +7,11 @@
 3. [Testes](#testes)
 
 ## Descrição do Projeto
+Este projeto é um `Gerador de código` desenvolvido como parte do TP5 de Compiladores, tem como objetivo criar um compilador completamente funcional para a linguagem COOL. 
+
+O gerador criado faz uso da AST contruída no trabalho 4, e da análise semântica. Além disso, ele produz código na linguagem Assembly, do MIPS, que implementa corretamente códigos produzidos em COOL. Nesse gerador, não existe tratamento e recuperação de erros na geração de código, sendo assim, todos os programas incorretos devem ter sido detectados pelos passos anteriores do compilador. 
+
+Os códigos alterados pelo grupo se encontram em “CgenClassTable.java”, “CgenNode.java”, “CgenSupport.java”, e “cool-tree.java”. Iremos explicar a seguir as alterações feitas em cada arquivo.
 
 ## Código
 ### CgenClassTable.java
@@ -1332,3 +1337,5 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
 Para o fluxo desse método code, o primeiro passo é verificar se o objeto é `self`. Se o objeto for self, carrega o registrador SELF no acumulador ($ACC) caso não seja self, calcula o deslocamento do atributo na tabela de atributos e carrega seu valor. Se for uma variável local, calcula o deslocamento na pilha e carrega seu valor. Por fim, adiciona comentários indicando o início e o fim da operação.
 
 ## Testes
+Foi criado um arquivo “exemplo.cl”, onde contém um programa teste, como o objetivo de testar a maior quantidade possível de construções de forma a garantir o funcionamento correto do gerador de código. 
+
