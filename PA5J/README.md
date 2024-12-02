@@ -538,6 +538,141 @@ Inicializadores e Métodos
 * Os métodos methodList e attrOffsetMap gerenciam a localização de métodos e atributos em memória. Já os métodos codeObjInit e codeClassMethods usam instruções específicas para emitir código para a arquitetura de destino (provavelmente MIPS).
 * Variáveis estáticas como CURR_CLASS_TAG mantêm o estado global para identificadores únicos e controle de escopo.
 
+### CgenSupport.java
+Essa classe é projetada para emitir instruções de assembly para um compilador, faciltar o uso de convenções comuns durante a geração de código e fornecer utilitários reutilzáveis que manipulam valores, endereços e registradores. Ela contém um conjunto de constantes, convenções e métodos utilitários para gerar as instruções em formato MIPS. Em resumo, ela encapsula a lógica para gerar os códigos em assemly de maneira eficiente e estruturada. 
+
+1 - Constantes:
+    * Controle de Garbage Collector (GC): Essas strings representam nomes de funções relacionadas ao controle do GC no código gerado.
+        ```
+            final static String[] gcInitNames = {"_NoGC_Init", "_GenGC_Init", "_ScnGC_Init"};
+            final static String[] gcCollectNames = {"_NoGC_Collect", "_GenGC_Collect", "_ScnGC_Collect"};
+        ```
+
+   * Configurações gerais: 
+         ```
+             final static int MAXINT = 100000000;
+             final static int WORD_SIZE = 4;
+         ```
+
+   * Nomes globais para tabelas: Define nomes padrão para tabelas globais usadas no código gerado.
+        ```
+            final static String CLASSNAMETAB = "class_nameTab";
+        ```
+     * Offset e tamanhos de objetos: Define que os objetos têm, no mínimo, 3 campos no cabeçalho (tag, tamanho e tabela de métodos).
+        ```
+            final static int DEFAULT_OBJFIELDS = 3;
+        ```
+
+2 - Convenções de registradores: 
+O código segue as convenções de registradores de MIPS:
+
+    ```
+        final static String ZERO = "$zero";  // Registrador sempre com valor zero.
+        final static String ACC = "$a0";    // Acumulador.
+        final static String SP = "$sp";     // Ponteiro de pilha.
+        final static String RA = "$ra";     // Endereço de retorno.
+    ```
+
+Essas constantes permitem que o código de geração de assembly use nomes amigáveis em vez de valores diretos.
+
+3 - Convenções de instruções: 
+O código usa strings constantes para representar instruções de assembly, como:
+
+```
+    final static String LW = "\tlw\t";  // Load Word
+    final static String SW = "\tsw\t";  // Store Word
+    final static String ADD = "\tadd\t";
+```
+
+
+4 - Métodos utilitários:
+Esses métodos geram instruções de assembly específicas. Exemplos:
+
+   * emitLoad e emitStore: Manipulam dados na memória.
+         ```
+            static void emitLoad(String dest_reg, int offset, String source_reg, PrintStream s) {
+                s.println(LW + dest_reg + " " + offset * WORD_SIZE + "(" + source_reg + ")");
+            }
+         ```
+   * Gera uma instrução lw (load word) para carregar um valor da memória para um registrador.
+   * Calcula o endereço com base no offset e no WORD_SIZE.
+     
+Similarmente, emitStore escreve valores de registradores na memória.
+
+   * emitAdd, emitSub: Operações aritméticas.
+        ```
+            static void emitAdd(String dest_reg, String src1, String src2, PrintStream s) {
+                s.println(ADD + dest_reg + " " + src1 + " " + src2);
+            }
+        ``` 
+
+   Gera instruções para somar, subtrair, multiplicar, etc.
+
+   * emitBranch: Gera instruções de desvio condicional ou incondicional.
+    ```
+        static void emitBranch(int label, PrintStream s) {
+            s.print(BRANCH);
+            emitLabelRef(label, s);
+            s.println("");
+        }
+    ```
+
+5 - Manipulação de constantes:
+Os métodos permitem carregar constantes específicas:
+
+  * Carregar inteiros:
+    ```
+        static void emitLoadImm(String dest_reg, int val, PrintStream s) {
+            s.println(LI + dest_reg + " " + val);
+        }
+    ```
+
+     Gera uma instrução li para carregar um valor imediato no registrador.
+
+   * Carregar strings ou booleanos:
+    ```
+        static void emitLoadString(String dest_reg, StringSymbol str, PrintStream s) {
+            emitPartialLoadAddress(dest_reg, s);
+            str.codeRef(s);
+            s.println("");
+        }
+    ```
+
+     Combina carregamento de endereço com referência ao objeto.
+
+6 - Operações com garbage collector:
+O código suporta chamadas ao coletor de lixo:
+
+   * emitTestCollector: Testa o GC.
+        ```
+            static void emitTestCollector(PrintStream s) {
+                emitPush(ACC, s);
+                emitMove(ACC, SP, s);
+                s.println(JAL + gcCollectNames[Flags.cgen_Memmgr]);
+                emitAddiu(SP, SP, 4, s);
+            }
+        ```
+Essa sequência salva valores no topo da pilha e chama o GC.
+
+7 - Emissão de comentários e strings:
+   * Comentários:
+    ```
+        static void emitComment(PrintStream s, String str) {
+            s.println("\t\t\t\t#" + str);
+        }
+    ```
+Insere comentários no código assembly.
+
+  * Strings no formato ASCII:
+    ```
+        static void emitStringConstant(String str, PrintStream s) {
+            for (int i = 0; i < str.length(); i++) {
+                char c = str.charAt(i);
+                // Manipula caracteres especiais como \n e \t.
+            }
+        }
+    ```
+
 ### cool-tree.java
 
 Para esse arquivo, foi implementado em diferentes classes o método `code`, que se encontra definido porém vazio. O método `code` é responsável pela geração do código assembly para o nó da AST que está sendo definido naquela classe. Então, o que fizemos foi implementar esse método nas diferentes classes declaradas, conforme iremos definir a seguir.
