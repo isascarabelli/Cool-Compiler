@@ -160,7 +160,7 @@ class Main inherits IO {
 
         -- Grande expressão
         let x : Int <- 5 in {
-            out_int((x <- 1) + ((x <- x+1) + (3 + (4 + (5 + (6 + (7+ (x+6)))))))); 
+            out_int((x <- 1) + ((x <- x+1) + (3 + (4 + (5 + (6 + (7+ (x+6)))))))));
         };
 
         -- Teste Tipo SELF_TYPE
@@ -172,19 +172,23 @@ class Main inherits IO {
 
         -- Teste com pilha
         ch <- in_string();
-        while not (ch = "x") loop  
-        {
+        while not (ch = "x") loop {
             if ch = "e" then {
-                if stack.head() = "-1" then "Do Nothing" 
-                else {
+                if stack.head() = "-1" then {
+                    out_string("Do Nothing\n");
+                } else {
                     ch <- stack.head();
                     stack <- stack.tail();
                     stack <- stack.push(ch);
-                }
-            } else if ch = "d" then print_stack(stack) else
-            { stack <- stack.push(ch); "Erro"; }
-            fi;
-            ch <- in_string();  
+                };
+            } else if ch = "d" then {
+                print_stack(stack);
+            } else {
+                stack <- stack.push(ch);
+                out_string("Erro\n");
+            };
+            ch <- in_string();
         } pool;
     };
 };
+
