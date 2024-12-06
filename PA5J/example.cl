@@ -160,7 +160,7 @@ class Main inherits IO {
 
         -- Grande expressão
         let x : Int <- 5 in {
-            out_int((x <- 1) + ((x <- x+1) + (3 + (4 + (5 + (6 + (7+ (x+6)))))))));
+            out_int((x <- 1) + ((x <- x+1) + (3 + (4 + (5 + (6 + (7+ (x+6))))))));
         };
 
         -- Teste Tipo SELF_TYPE
@@ -180,15 +180,15 @@ class Main inherits IO {
                     ch <- stack.head();
                     stack <- stack.tail();
                     stack <- stack.push(ch);
-                };
+                }
             } else if ch = "d" then {
                 print_stack(stack);
             } else {
                 stack <- stack.push(ch);
                 out_string("Erro\n");
-            };
+            }
             ch <- in_string();
         } pool;
-    };
+    }
 };
 
