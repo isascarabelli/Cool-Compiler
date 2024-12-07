@@ -1337,5 +1337,28 @@ public void code(PrintStream s, CgenClassTable cgenTable) {
 Para o fluxo desse método code, o primeiro passo é verificar se o objeto é `self`. Se o objeto for self, carrega o registrador SELF no acumulador ($ACC) caso não seja self, calcula o deslocamento do atributo na tabela de atributos e carrega seu valor. Se for uma variável local, calcula o deslocamento na pilha e carrega seu valor. Por fim, adiciona comentários indicando o início e o fim da operação.
 
 ## Testes
-Foi criado um arquivo “exemplo.cl”, onde contém um programa teste, como o objetivo de testar a maior quantidade possível de construções de forma a garantir o funcionamento correto do gerador de código. 
+Foi criado um arquivo “exemplo.cl” , onde contém um programa teste, com o objetivo de testar a maior quantidade possível de construções de forma a garantir o funcionamento correto do gerador de código. 
+
+O arquivo “exemplo.cl” se trata de uma máquina de pilha, onde cada instância da classe pode ter um elemento no topo em "top" e o restante da pilha em "next". De forma mais detalhada, "top" se trata de um atributo do tipo "String", onde é armazenado o topo da pilha, e "next" é um atributo do tipo "Stack", que funciona apontando para o próximo elemento, caso a pilha seja vazia ele pode ser "nil". Essa abordagem permite a criação e manipulação de pilhas dinamicamente.
+
+Em termos de análise léxica, sintática, e semântica, podemos abordar:
+ - Análise Léxica: Análise do arquivo para identificação de tokens. 
+ - Análise Sintática: Análise da estrututra do código, com o objetivo de verificar o cumprimento ds regras da gramática da linguagem.
+ - Análise Semântica: Irá analisar o significado do programa, seus tipos de dados, escopos e consistência. 
+
+Quando executado, temos a seguinte saída:
+
+![image](https://github.com/user-attachments/assets/ffdf08b1-4552-4dc5-af0e-8268da590ee6)
+
+
+Nela, foi criado um protótipo de objeto para o arquivo teste, onde os atributos da classe Stack, doram organizados em um mapa `attrOffsetMap`, onde trabalha com a questão do "top" e "next". Quando o código em Cool é traduzido para o Assembly, os índices presentes em `attrOffsetMap` são usados para o cálculo de endereços. 
+
+No final, retorna um arquivo em Assembly. Esse arquivo organiza e implementa: 
+  Inicialização de Classes, onde são gerados tabelas de calsses no segmento de dados, esse que inclui métodos para inicialização de atributos e preparação de instâncias.
+ 
+  A árvore de herança construida define métodos e atributos que são compartilhados entre as classes pais e filhos. Além disso, a partir das tabelas de métodos, é possível o despacho dinâmico para ocorrer as chamadas de métodos. Dessa forma, é possível trabalhar com polimorfismo e herança.
+  
+  Na execução dos métodos, as instruções do código gerenciam os retornos, acessos ás variávies, e chamadas, assim como a tradução dos métodos para funções em assembly.
+
+  Por fim, sobre o gerenciamento da memória, as tags e constantes são responsáveis pela garantia que os objetos sejam identificados de forma correta dentro do tempo de execução.
 
